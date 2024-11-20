@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:context=".ui.RegisterActivity">
+
+    <LinearLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="15dp"
+        android:gravity="center">
+
+        <ProgressBar
+            android:id="@+id/register_PB_progressBar"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/register_LBL_register"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/register"
+            android:textSize="25sp"
+            android:textStyle="bold|italic"
+            android:gravity="center" />
+
+        <RadioGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/register_RDB_volunteer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/volunteer"
+                android:checked="true"
+                android:textStyle="bold|italic"
+                android:textSize="15sp" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="invisible" />
+
+            <RadioButton
+                android:id="@+id/register_RDB_recipient"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/recipient"
+                android:textStyle="bold|italic"
+                android:textSize="15sp" />
+        </RadioGroup>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/register_LBL_aboutYou"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/about_you"
+            android:textSize="18sp"
+            android:textStyle="bold|italic"
+            android:gravity="left" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/register_EDT_firstName"
+                android:hint="@string/first_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName|textCapWords"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ " />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/register_EDT_lastName"
+                android:hint="@string/last_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName|textCapWords"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ " />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/register_EDT_phoneNumber"
+                android:hint="@string/phone_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:digits="0123456789" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="left"
+            android:layout_marginTop="5dp">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/register_LBL_age"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:text="@string/age"
+                android:textStyle="italic"
+                android:textSize="18sp" />
+
+            <Spinner
+                android:id="@+id/register_SPN_age"
+                android:layout_width="175dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="left"
+            android:layout_marginTop="5dp">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/register_LBL_gender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:text="@string/gender"
+                android:textStyle="italic"
+                android:textSize="18sp" />
+
+            <Spinner
+                android:id="@+id/register_SPN_gender"
+                android:layout_width="175dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="left"
+            android:layout_marginTop="5dp">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/register_LBL_languages"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:text="@string/languages"
+                android:textStyle="italic"
+                android:textSize="18sp" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/register_LBL_selectLanguages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/select_languages"
+                android:padding="12dp"
+                android:drawablePadding="16dp"
+                android:layout_marginLeft="15dp"
+                android:drawableEnd="@android:drawable/arrow_down_float"
+                android:background="@android:drawable/editbox_background"
+                />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="left"
+            android:layout_marginTop="5dp">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/register_LBL_services"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:text="@string/services"
+                android:textStyle="italic"
+                android:textSize="18sp" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/register_LBL_selectServices"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/select_services"
+                android:padding="12dp"
+                android:drawablePadding="16dp"
+                android:layout_marginLeft="15dp"
+                android:drawableEnd="@android:drawable/arrow_down_float"
+                android:background="@android:drawable/editbox_background"
+                />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/register_LBL_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/address"
+            android:textSize="18sp"
+            android:textStyle="bold|italic"
+            android:gravity="left"
+            android:layout_marginTop="8dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/register_EDT_city"
+                android:hint="@string/city"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName|textCapWords"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ " />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/register_EDT_street"
+                android:hint="@string/street"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName|textCapWords"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ " />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/register_EDT_houseNumber"
+                android:hint="@string/house_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:digits="0123456789" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/register_EDT_apartmentNumber"
+                android:hint="@string/apartment_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:digits="0123456789" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/register_LBL_emailPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/email_and_password"
+            android:textSize="18sp"
+            android:textStyle="bold|italic"
+            android:gravity="left"
+            android:layout_marginTop="8dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/register_EDT_email"
+                android:hint="@string/email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/register_EDT_password"
+                android:hint="@string/password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/register_BTN_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/register"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"/>
+
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/register_LBL_loginNow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/click_to_login"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"/>
+
+    </LinearLayout>
+</ScrollView>

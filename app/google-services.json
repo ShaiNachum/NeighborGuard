@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "83471691449",
+    "project_id": "neighborguard-57256",
+    "storage_bucket": "neighborguard-57256.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:83471691449:android:6da792396611506ef73568",
+        "android_client_info": {
+          "package_name": "com.example.neighborguard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8Hv9aZZuqw1urE4qvTDZwQ0Hzy6qC2VI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
