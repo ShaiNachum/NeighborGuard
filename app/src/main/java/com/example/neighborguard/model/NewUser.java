@@ -16,9 +16,10 @@ public class NewUser {
     private String email;
     private String password;
     private LonLat lonLat;
+    private long lastOk;
 
 
-    public NewUser(){
+    public NewUser() {
     }
 
     public UserRoleEnum getRole() {
@@ -117,6 +118,15 @@ public class NewUser {
         this.lonLat = lonLat;
     }
 
+    public long getLastOk() {
+        return lastOk;
+    }
+
+    public void setLastOk(long lastOk) {
+        this.lastOk = lastOk;
+    }
+
+
     @Override
     public String toString() {
         return "NewUser{" +
@@ -132,6 +142,7 @@ public class NewUser {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", lonLat=" + lonLat +
+                ", lastOk=" + lastOk +
                 '}';
     }
 }

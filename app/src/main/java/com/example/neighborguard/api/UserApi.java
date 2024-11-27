@@ -1,5 +1,6 @@
 package com.example.neighborguard.api;
 
+import com.example.neighborguard.model.ExtendedUser;
 import com.example.neighborguard.model.NewUser;
 import com.example.neighborguard.model.SearchUsersResponseSchema;
 import com.example.neighborguard.model.User;
@@ -22,6 +23,27 @@ public interface UserApi {
             @Query("toExtendMeeting") boolean toExtendMeeting
     );
 
+    @PUT("users/{uid}")
+    Call<Void> updateUser(
+            @Path("uid") String uid,
+            @Body User user
+    );
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //    @GET("admin/users")
 //    Call<User[]> getAllUsers(
 //            @Query("userSuperapp") String userSuperapp,
@@ -29,11 +51,3 @@ public interface UserApi {
 //            @Query("size") int size,
 //            @Query("page") int page
 //    );
-//
-//    @PUT("users/{superapp}/{userEmail}")
-//    Call<Void> updateUser(
-//            @Path("superapp") String superapp,
-//            @Path("userEmail") String userEmail,
-//            @Body User updatedUser
-//    );
-}

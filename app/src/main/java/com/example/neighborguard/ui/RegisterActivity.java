@@ -26,6 +26,7 @@ import com.example.neighborguard.model.NewUser;
 import com.example.neighborguard.model.User;
 import com.example.neighborguard.model.UserGenderEnum;
 import com.example.neighborguard.model.UserRoleEnum;
+import com.example.neighborguard.utils.DialogUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -85,7 +86,6 @@ public class RegisterActivity extends AppCompatActivity {
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser != null){
-            //TODO: change to api call
             User user = new User();
             user.setEmail(currentUser.getEmail());
             switchToLoginActivity(user);
@@ -157,87 +157,18 @@ public class RegisterActivity extends AppCompatActivity {
         languagesList = new ArrayList<>();
         selectedLanguagesList = new ArrayList<>();
 
-        binding.registerLBLSelectLanguages.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Initiate alert dialog
-                AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
-                //set title
-                builder.setTitle("Select Languages");
-                //set dialog non cancelable
-                builder.setCancelable(false);
-
-                builder.setMultiChoiceItems(languagesArray, selectedLanguages, new DialogInterface.OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                        //Check condition
-                        if(isChecked){
-                            //When checkbox selected
-                            //Add position in languagesList
-                            languagesList.add(which);
-                        }else{
-                            //When checkbox unselected
-                            //Remove position from languagesList
-                            languagesList.remove(Integer.valueOf(which));//!!!
-                        }
-                    }
-                });
-
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //initialize string builder
-                        StringBuilder stringBuilder = new StringBuilder();
-                        //clear the previous selections in languages list
-                        selectedLanguagesList.clear();
-                        //use for loop to append selected languages
-                        for (int i = 0; i < languagesList.size(); i++) {
-                            String language = languagesArray[languagesList.get(i)];
-                            selectedLanguagesList.add(language);
-
-                            //concat array value
-                            stringBuilder.append(language);
-                            //check condition
-                            if (i < languagesList.size() - 1) {
-                                //concat comma
-                                stringBuilder.append(", ");
-                            }
-                        }
-
-                        //set text to text view
-                        binding.registerLBLSelectLanguages.setText(stringBuilder.toString());
-                    }
-                });
-
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //dismiss dialog
-                        dialog.dismiss();
-                    }
-                });
-
-                builder.setNeutralButton("Clear All", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //Use for loop
-                        for (int i = 0; i < selectedLanguages.length; i++) {
-                            //Remove all selection
-                            selectedLanguages[i] = false;
-                        }
-                        //clear languagesList
-                        languagesList.clear();
-                        //clear the selected languages list
-                        selectedLanguagesList.clear();
-                        //set text to text view
-                        binding.registerLBLSelectLanguages.setText("Select Languages");
-                    }
-                });
-
-                //Show dialog
-                builder.show();
-            }
-        });
+        binding.registerLBLSelectLanguages.setOnClickListener(v ->
+                DialogUtils.showMultiChoiceDialog(
+                        this,
+                        "Select Languages",
+                        languagesArray,
+                        selectedLanguages,
+                        languagesList,
+                        selectedLanguagesList,
+                        binding.registerLBLSelectLanguages,
+                        "Select Languages"
+                )
+        );
     }
 
 
@@ -252,87 +183,18 @@ public class RegisterActivity extends AppCompatActivity {
         servicesList = new ArrayList<>();
         selectedServicesList = new ArrayList<>();
 
-        binding.registerLBLSelectServices.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Initiate alert dialog
-                AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
-                //set title
-                builder.setTitle("Select Services");
-                //set dialog non cancelable
-                builder.setCancelable(false);
-
-                builder.setMultiChoiceItems(servicesArray, selectedServices, new DialogInterface.OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                        //Check condition
-                        if(isChecked){
-                            //When checkbox selected
-                            //Add position in servicesList
-                            servicesList.add(which);
-                        }else{
-                            //When checkbox unselected
-                            //Remove position from languagesList
-                            servicesList.remove(Integer.valueOf(which));//!!!
-                        }
-                    }
-                });
-
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //initialize string builder
-                        StringBuilder stringBuilder = new StringBuilder();
-                        //clear the previous selections in services list
-                        selectedServicesList.clear();
-                        //use for loop to append selected languages
-                        for (int i = 0; i < servicesList.size(); i++) {
-                            String service = servicesArray[servicesList.get(i)];
-                            selectedServicesList.add(service);
-
-                            //concat array value
-                            stringBuilder.append(service);
-                            //check condition
-                            if (i < servicesList.size() - 1) {
-                                //concat comma
-                                stringBuilder.append(", ");
-                            }
-                        }
-
-                        //set text to text view
-                        binding.registerLBLSelectServices.setText(stringBuilder.toString());
-                    }
-                });
-
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //dismiss dialog
-                        dialog.dismiss();
-                    }
-                });
-
-                builder.setNeutralButton("Clear All", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //Use for loop
-                        for (int i = 0; i < selectedServices.length; i++) {
-                            //Remove all selection
-                            selectedServices[i] = false;
-                        }
-                        //clear languagesList
-                        servicesList.clear();
-                        //clear the selected languages list
-                        selectedServicesList.clear();
-                        //set text to text view
-                        binding.registerLBLSelectServices.setText("Select Languages");
-                    }
-                });
-
-                //Show dialog
-                builder.show();
-            }
-        });
+        binding.registerLBLSelectServices.setOnClickListener(v ->
+                DialogUtils.showMultiChoiceDialog(
+                        this,
+                        "Select Services",
+                        servicesArray,
+                        selectedServices,
+                        servicesList,
+                        selectedServicesList,
+                        binding.registerLBLSelectServices,
+                        "Select Services"
+                )
+        );
     }
 
 
@@ -345,9 +207,10 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void registerClicked() {
         binding.registerPBProgressBar.setVisibility(View.VISIBLE);
+
         NewUser newUser = new NewUser();
-        Address address = new Address();
-        LonLat lonLat = new LonLat();
+        address = new Address();
+        lonLat = new LonLat();
 
         if(binding.registerRDBRecipient.isChecked())
             role = UserRoleEnum.RECIPIENT;
@@ -469,8 +332,14 @@ public class RegisterActivity extends AppCompatActivity {
         }
         newUser.setPassword(this.password);
 
-        lonLat.setLatitude(0.0);
-        lonLat.setLongitude(0.0);
+        if(role == UserRoleEnum.RECIPIENT){
+            lonLat.setLatitude(32.114059);
+            lonLat.setLongitude(34.798969);
+        }
+        else{
+            lonLat.setLatitude(32.119885);
+            lonLat.setLongitude(34.800303);
+        }
         newUser.setLonLat(lonLat);
 
         mAuth.createUserWithEmailAndPassword(email, password)

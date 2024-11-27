@@ -17,7 +17,6 @@ import com.example.neighborguard.databinding.ActivityLogInBinding;
 import com.example.neighborguard.model.CurrentUserManager;
 import com.example.neighborguard.model.ExtendedUser;
 import com.example.neighborguard.model.SearchUsersResponseSchema;
-import com.example.neighborguard.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -65,7 +64,7 @@ public class LogInActivity extends AppCompatActivity {
         this.email = intent.getStringExtra("email");
         this.password = intent.getStringExtra("password");
 
-        if (email == null || password == null)
+        if (email != null && password != null)
             getUserByEmail(email);
 
         initViews();
@@ -106,6 +105,7 @@ public class LogInActivity extends AppCompatActivity {
         doLogin(email, password);
     }
 
+
     private void doLogin(String email, String password){
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -126,6 +126,7 @@ public class LogInActivity extends AppCompatActivity {
                 });
     }
 
+
     private void getUserByEmail(String email){
         Call<SearchUsersResponseSchema> call = apiService.findUser(email, true);
 
@@ -137,6 +138,7 @@ public class LogInActivity extends AppCompatActivity {
                     throw new IllegalArgumentException("null response body");
                 }
                 ExtendedUser user = responseBody.getFirstExtendedUser();
+
                 if (response.isSuccessful()  && user != null) {
                     Toast.makeText(LogInActivity.this, "Hello " + user.getEmail(), Toast.LENGTH_LONG).show();
                     switchToMainActivity(user);
@@ -153,10 +155,11 @@ public class LogInActivity extends AppCompatActivity {
         });
     }
 
+
     private void switchToMainActivity(ExtendedUser user) {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         CurrentUserManager manager = CurrentUserManager.getInstance();
-        manager.setUser(user);
+        manager.setExtendedUserFromExtendedUser(user);
         startActivity(intent);
         this.finish();
     }

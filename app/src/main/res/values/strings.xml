@@ -31,4 +31,6 @@
     <string name="about_you">About you</string>
     <string name="select_languages">Select languages</string>
     <string name="select_services">Select services</string>
+    <string name="save">Save</string>
+    <string name="i_am_ok">I AM OK 👍</string>
 </resources>
