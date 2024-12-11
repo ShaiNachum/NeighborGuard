@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import com.example.neighborguard.api.ApiController;
 import com.example.neighborguard.api.UserApi;
 import com.example.neighborguard.databinding.FragmentHomeBinding;
+import com.example.neighborguard.interfaces.Callback_recipientClicked;
 import com.example.neighborguard.model.CurrentUserManager;
 import com.example.neighborguard.model.User;
 import com.example.neighborguard.model.UserRoleEnum;
@@ -27,6 +28,10 @@ public class HomeFragment extends Fragment {
     private UserApi userApi;
     private FragmentHomeBinding binding;
     private CurrentUserManager currentUserManager;
+
+    private ListFragment listFragment;
+    private MapFragment mapFragment;
+
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -45,11 +50,41 @@ public class HomeFragment extends Fragment {
 
         setUserUIByRole(currentUserManager.getUser().getRole());
 
-        initViews();
+        initViews(currentUserManager.getUser().getRole());
     }
 
-    private void initViews() {
-        binding.homeBTNIAmOk.setOnClickListener(View -> iAmOkClicked());
+
+    private void initViews(UserRoleEnum role) {
+        if(role == UserRoleEnum.VOLUNTEER){
+            //list:
+            listFragment = new ListFragment();
+            getParentFragmentManager().beginTransaction()
+                    .add(binding.homeVolunteerFRAMEList.getId(), listFragment)
+                    .commit();
+
+            listFragment.setCallbackRecipientClicked(new Callback_recipientClicked() {
+                @Override
+                public void recipientClicked(double lat, double lng) {
+                    mapFragment.zoop(lat,lng);
+                }
+            });
+
+
+
+
+            //map:
+            mapFragment = new MapFragment();
+            getParentFragmentManager().beginTransaction()
+                    .add(binding.homeRecipientFRAMEMap.getId(), mapFragment)
+                    .commit();
+
+
+
+
+        }
+        else {//is Recipient
+            binding.homeRecipientBTNIAmOk.setOnClickListener(View -> iAmOkClicked());
+        }
     }
 
 
@@ -97,10 +132,12 @@ public class HomeFragment extends Fragment {
 
     private void setUserUIByRole(UserRoleEnum role) {
         if(role == UserRoleEnum.VOLUNTEER){
-            binding.homeBTNIAmOk.setVisibility(View.GONE);
+            binding.homeRecipientBTNIAmOk.setVisibility(View.GONE);
+            binding.homeVolunteerFRAMEList.setVisibility(View.VISIBLE);
+            binding.homeRecipientFRAMEMap.setVisibility(View.VISIBLE);
         }
         else{//is Recipient
-            binding.homeBTNIAmOk.setVisibility(View.VISIBLE);
+            binding.homeRecipientBTNIAmOk.setVisibility(View.VISIBLE);
         }
     }
 

@@ -1,8 +1,18 @@
 package com.example.neighborguard.ui.settings;
 
+import android.app.Activity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +35,8 @@ import com.example.neighborguard.utils.DialogUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import retrofit2.Call;
@@ -42,7 +54,7 @@ public class SettingsFragment extends Fragment{
 
     private String firstName;
     private String lastName;
-    private int phoneNumber;
+    private String phoneNumber;
 
     private ArrayList<String> languages;
     private String[] languagesArray;
@@ -63,6 +75,11 @@ public class SettingsFragment extends Fragment{
     private int apartmentNumber;
 
     private LonLat lonLat;
+
+    private final int CAM_REQ = 1000;
+    private final int IMG_REQ = 2000;
+    private String base64ProfileImage;
+    private static final int PERMISSION_REQUEST_CODE = 3000;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -87,6 +104,8 @@ public class SettingsFragment extends Fragment{
             return;
         }
 
+        checkAndRequestPermissions();
+
         initViews();
     }
 
@@ -102,13 +121,131 @@ public class SettingsFragment extends Fragment{
         binding.settingsBTNLogout.setOnClickListener(View -> logoutClicked());
         binding.settingsBTNSave.setOnClickListener(View -> saveClicked());
 
+        binding.settingsCRDCamera.setOnClickListener(View -> cameraClicked());
+        binding.settingsCRDPhotos.setOnClickListener(View -> photosClicked());
+
         initHintsFromCurrentUser();
         initLanguages();
         initServices();
     }
 
 
+    private void photosClicked() {
+        if (getActivity() == null) return;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (getActivity().checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                checkAndRequestPermissions();
+                return;
+            }
+        } else if (getActivity().checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            checkAndRequestPermissions();
+            return;
+        }
+
+        Intent photoIntent = new Intent(Intent.ACTION_PICK);
+        photoIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(photoIntent, IMG_REQ);
+    }
+
+
+    private void cameraClicked() {
+        if (getActivity() == null) return;
+
+        if (getActivity().checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            checkAndRequestPermissions();
+            return;
+        }
+
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(cameraIntent, CAM_REQ);
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(getActivity() == null) return;
+
+        if(resultCode == Activity.RESULT_OK && data != null) {
+            if(requestCode == CAM_REQ) {
+                try {
+                    Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+                    if(bitmap != null) {
+                        binding.settingIMGProfile.setImageBitmap(bitmap);
+                        base64ProfileImage = convertBitmapToBase64(bitmap);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(getActivity(), "Failed to capture image", Toast.LENGTH_SHORT).show();
+                }
+            }
+            else if(requestCode == IMG_REQ) {
+                try {
+                    Uri imageUri = data.getData();
+                    if(imageUri != null) {
+                        binding.settingIMGProfile.setImageURI(imageUri);
+                        base64ProfileImage = convertUriToBase64(imageUri);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(getActivity(), "Failed to load image", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+
+    private void checkAndRequestPermissions() {
+        if (getActivity() == null) return;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13 and above
+            if (getActivity().checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES}, PERMISSION_REQUEST_CODE);
+            }
+        } else {
+            // Below Android 13
+            if (getActivity().checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+            }
+        }
+
+        if (getActivity().checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{android.Manifest.permission.CAMERA}, PERMISSION_REQUEST_CODE);
+        }
+    }
+
+
+    private String convertBitmapToBase64(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
+
+
+    private String convertUriToBase64(Uri imageUri) {
+        try {
+            if (getActivity() == null) return null;
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
+            return convertBitmapToBase64(bitmap);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
     private void initHintsFromCurrentUser() {
+        base64ProfileImage = currentUserManager.getUser().getProfileImage();
+        if (base64ProfileImage != null && !base64ProfileImage.isEmpty()) {
+            Bitmap bitmap = base64ToBitmap(base64ProfileImage);
+            if (bitmap != null) {
+                binding.settingIMGProfile.setImageBitmap(bitmap);
+            }
+        }
         binding.settingsEDTFirstName.setText(currentUserManager.getUser().getFirstName());
         binding.settingsEDTLastName.setText(String.valueOf(currentUserManager.getUser().getLastName()));
         binding.settingsEDTPhoneNumber.setText(String.valueOf(currentUserManager.getUser().getPhoneNumber()));
@@ -118,6 +255,17 @@ public class SettingsFragment extends Fragment{
         binding.settingsEDTStreet.setText(currentUserManager.getUser().getAddress().getStreet());
         binding.settingsEDTHouseNumber.setText(String.valueOf(currentUserManager.getUser().getAddress().getHouseNumber()));
         binding.settingsEDTApartmentNumber.setText(String.valueOf(currentUserManager.getUser().getAddress().getApartmentNumber()));
+    }
+
+
+    private Bitmap base64ToBitmap(String base64Image) {
+        try {
+            byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 
@@ -183,85 +331,93 @@ public class SettingsFragment extends Fragment{
         address = user.getAddress();
         lonLat = new LonLat();
         boolean isAddressChanged = false;
+        boolean isChanged = false;
 
+        // Profile Image
+        if (base64ProfileImage != null && !base64ProfileImage.equals(user.getProfileImage())) {
+            user.setProfileImage(base64ProfileImage);
+            isChanged = true;
+            Toast.makeText(getActivity(), "Profile image updated", Toast.LENGTH_SHORT).show();
+        }
+
+        // First Name
         firstName = String.valueOf(binding.settingsEDTFirstName.getText());
-        if (!TextUtils.isEmpty(firstName)) {
-            binding.settingsPBProgressBar.setVisibility(View.GONE);
-
+        if (!TextUtils.isEmpty(firstName) && !firstName.equals(user.getFirstName())) {
             user.setFirstName(this.firstName);
+            isChanged = true;
             Toast.makeText(getActivity(), "First Name updated", Toast.LENGTH_SHORT).show();
         }
-        user.setFirstName(this.firstName);
 
+        // Last Name
         lastName = String.valueOf(binding.settingsEDTLastName.getText());
-        if (!TextUtils.isEmpty(lastName)) {
-            binding.settingsPBProgressBar.setVisibility(View.GONE);
-
+        if (!TextUtils.isEmpty(lastName) && !lastName.equals(user.getLastName())) {
             user.setLastName(this.lastName);
+            isChanged = true;
             Toast.makeText(getActivity(), "Last Name updated", Toast.LENGTH_SHORT).show();
         }
-        user.setLastName(this.lastName);
 
-        phoneNumber = Integer.parseInt(String.valueOf(binding.settingsEDTPhoneNumber.getText()));
-        if (!TextUtils.isEmpty(String.valueOf(phoneNumber))) {
-            binding.settingsPBProgressBar.setVisibility(View.GONE);
-
+        // Phone Number
+        phoneNumber = String.valueOf(binding.settingsEDTPhoneNumber.getText());
+        if (!TextUtils.isEmpty(phoneNumber) && !phoneNumber.equals(user.getPhoneNumber())) {
             user.setPhoneNumber(this.phoneNumber);
+            isChanged = true;
             Toast.makeText(getActivity(), "Phone number updated", Toast.LENGTH_SHORT).show();
         }
 
-        if (!selectedLanguagesList.isEmpty()) {
-            binding.settingsPBProgressBar.setVisibility(View.GONE);
-
+        // Languages
+        if (!selectedLanguagesList.isEmpty() && !selectedLanguagesList.equals(user.getLanguages())) {
             user.setLanguages(selectedLanguagesList);
+            isChanged = true;
             Toast.makeText(getActivity(), "Languages updated", Toast.LENGTH_SHORT).show();
         }
 
-        if (!selectedServicesList.isEmpty()) {
-            binding.settingsPBProgressBar.setVisibility(View.GONE);
-
+        // Services
+        if (!selectedServicesList.isEmpty() && !selectedServicesList.equals(user.getServices())) {
             user.setServices(selectedServicesList);
+            isChanged = true;
             Toast.makeText(getActivity(), "Service updated", Toast.LENGTH_SHORT).show();
         }
 
-
+        // City
         city = String.valueOf(binding.settingsEDTCity.getText());
-        if (!TextUtils.isEmpty(city)) {
-            binding.settingsPBProgressBar.setVisibility(View.GONE);
-
+        if (!TextUtils.isEmpty(city) && !city.equals(address.getCity())) {
             address.setCity(this.city);
             isAddressChanged = true;
+            isChanged = true;
             Toast.makeText(getActivity(), "City updated", Toast.LENGTH_SHORT).show();
         }
 
-
+        // Street
         street = String.valueOf(binding.settingsEDTStreet.getText());
-        if (!TextUtils.isEmpty(street)) {
-            binding.settingsPBProgressBar.setVisibility(View.GONE);
-
+        if (!TextUtils.isEmpty(street) && !street.equals(address.getStreet())) {
             address.setStreet(this.street);
             isAddressChanged = true;
+            isChanged = true;
             Toast.makeText(getActivity(), "Street updated", Toast.LENGTH_SHORT).show();
         }
 
-
-        houseNumber = Integer.parseInt(String.valueOf(binding.settingsEDTHouseNumber.getText()));
-        if (!TextUtils.isEmpty(String.valueOf(houseNumber))) {
-            binding.settingsPBProgressBar.setVisibility(View.GONE);
-
-            address.setHouseNumber(this.houseNumber);
-            isAddressChanged = true;
-            Toast.makeText(getActivity(), "Enter House Number", Toast.LENGTH_SHORT).show();
+        // House Number
+        String houseNumberStr = String.valueOf(binding.settingsEDTHouseNumber.getText());
+        if (!TextUtils.isEmpty(houseNumberStr)) {
+            houseNumber = Integer.parseInt(houseNumberStr);
+            if (houseNumber != address.getHouseNumber()) {
+                address.setHouseNumber(this.houseNumber);
+                isAddressChanged = true;
+                isChanged = true;
+                Toast.makeText(getActivity(), "House Number updated", Toast.LENGTH_SHORT).show();
+            }
         }
 
-
-        apartmentNumber = Integer.parseInt(String.valueOf(binding.settingsEDTApartmentNumber.getText()));
-        if (!TextUtils.isEmpty(String.valueOf(apartmentNumber))) {
-            binding.settingsPBProgressBar.setVisibility(View.GONE);
-
-            address.setApartmentNumber(this.apartmentNumber);
-            isAddressChanged = true;
-            Toast.makeText(getActivity(), "Enter Apartment Number", Toast.LENGTH_SHORT).show();
+        // Apartment Number
+        String apartmentNumberStr = String.valueOf(binding.settingsEDTApartmentNumber.getText());
+        if (!TextUtils.isEmpty(apartmentNumberStr)) {
+            apartmentNumber = Integer.parseInt(apartmentNumberStr);
+            if (apartmentNumber != address.getApartmentNumber()) {
+                address.setApartmentNumber(this.apartmentNumber);
+                isAddressChanged = true;
+                isChanged = true;
+                Toast.makeText(getActivity(), "Apartment Number updated", Toast.LENGTH_SHORT).show();
+            }
         }
 
         if(isAddressChanged){
@@ -269,8 +425,12 @@ public class SettingsFragment extends Fragment{
             user.setAddress(address);
         }
 
-
-        updateUserInBackend(user);
+        // Call updateUserInBackend if any changes were made
+        if (isChanged) {
+            updateUserInBackend(user);
+        } else {
+            Toast.makeText(getActivity(), "No changes made", Toast.LENGTH_SHORT).show();
+        }
     }
 
 

@@ -7,7 +7,7 @@ public class NewUser {
     private UserRoleEnum role;
     private String firstName;
     private String lastName;
-    private int phoneNumber;
+    private String phoneNumber;
     private int age;
     private UserGenderEnum gender;
     private ArrayList<String> languages;
@@ -17,6 +17,7 @@ public class NewUser {
     private String password;
     private LonLat lonLat;
     private long lastOk;
+    private String profileImage;
 
 
     public NewUser() {
@@ -46,11 +47,11 @@ public class NewUser {
         this.lastName = lastName;
     }
 
-    public int getPhoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(int phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
@@ -126,6 +127,13 @@ public class NewUser {
         this.lastOk = lastOk;
     }
 
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
 
     @Override
     public String toString() {
@@ -133,7 +141,7 @@ public class NewUser {
                 "role=" + role +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
-                ", phoneNumber=" + phoneNumber +
+                ", phoneNumber='" + phoneNumber + '\'' +
                 ", age=" + age +
                 ", gender=" + gender +
                 ", languages=" + languages +
@@ -143,6 +151,7 @@ public class NewUser {
                 ", password='" + password + '\'' +
                 ", lonLat=" + lonLat +
                 ", lastOk=" + lastOk +
+                ", profileImage='" + profileImage + '\'' +
                 '}';
     }
 }

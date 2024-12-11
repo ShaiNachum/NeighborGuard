@@ -3,8 +3,14 @@ package com.example.neighborguard.ui;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -12,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.neighborguard.MainActivity;
@@ -33,6 +40,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import retrofit2.Call;
@@ -48,7 +57,7 @@ public class RegisterActivity extends AppCompatActivity {
     private UserRoleEnum role;
     private String firstName;
     private String lastName;
-    private int phoneNumber;
+    private String phoneNumber;
 
     private ArrayList<Integer> agesList;
     private int age;
@@ -78,6 +87,11 @@ public class RegisterActivity extends AppCompatActivity {
 
     private LonLat lonLat;
 
+    private final int CAM_REQ = 1000;
+    private final int IMG_REQ = 2000;
+    private String base64ProfileImage;
+    private static final int PERMISSION_REQUEST_CODE = 3000;
+
 
 
     @Override
@@ -102,6 +116,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
+        checkAndRequestPermissions();
+
         initViews();
 
     }
@@ -110,11 +126,112 @@ public class RegisterActivity extends AppCompatActivity {
     private void initViews() {
         binding.registerBTNRegister.setOnClickListener(View -> registerClicked());
         binding.registerLBLLoginNow.setOnClickListener(View -> loginNowClicked());
+        
+        binding.registerCRDCamera.setOnClickListener(View -> cameraClicked());
+        binding.registerCRDPhotos.setOnClickListener(View -> photosClicked());
 
         initAges();
         initGenders();
         initLanguages();
         initServices();
+    }
+
+
+    private void photosClicked() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                checkAndRequestPermissions();
+                return;
+            }
+        } else if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            checkAndRequestPermissions();
+            return;
+        }
+
+        Intent photoIntent = new Intent(Intent.ACTION_PICK);
+        photoIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(photoIntent, IMG_REQ);
+    }
+
+
+    private void cameraClicked() {
+        if (checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            checkAndRequestPermissions();
+            return;
+        }
+
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(cameraIntent, CAM_REQ);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == RESULT_OK && data != null) {  // Changed from requestCode to resultCode
+            if(requestCode == CAM_REQ) {
+                try {
+                    Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+                    if(bitmap != null) {
+                        binding.registerIMGProfile.setImageBitmap(bitmap);
+                        base64ProfileImage = convertBitmapToBase64(bitmap);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Failed to capture image", Toast.LENGTH_SHORT).show();
+                }
+            }
+            else if(requestCode == IMG_REQ) {
+                try {
+                    Uri imageUri = data.getData();
+                    if(imageUri != null) {
+                        binding.registerIMGProfile.setImageURI(imageUri);
+                        base64ProfileImage = convertUriToBase64(imageUri);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+
+    private void checkAndRequestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13 and above
+            if (checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES}, PERMISSION_REQUEST_CODE);
+            }
+        } else {
+            // Below Android 13
+            if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+            }
+        }
+
+        if (checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{android.Manifest.permission.CAMERA}, PERMISSION_REQUEST_CODE);
+        }
+    }
+
+
+    private String convertBitmapToBase64(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
+
+
+    private String convertUriToBase64(Uri imageUri) {
+        try {
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+            return convertBitmapToBase64(bitmap);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 
@@ -218,6 +335,13 @@ public class RegisterActivity extends AppCompatActivity {
             role = UserRoleEnum.VOLUNTEER;
         newUser.setRole(this.role);
 
+        if(TextUtils.isEmpty(base64ProfileImage)){
+            binding.registerPBProgressBar.setVisibility(View.GONE);
+            Toast.makeText(RegisterActivity.this, "Please select a profile image", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        newUser.setProfileImage(base64ProfileImage);
+
         firstName = String.valueOf(binding.registerEDTFirstName.getText());
         if (TextUtils.isEmpty(firstName)) {
             binding.registerPBProgressBar.setVisibility(View.GONE);
@@ -234,7 +358,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
         newUser.setLastName(this.lastName);
 
-        phoneNumber = Integer.parseInt(String.valueOf(binding.registerEDTPhoneNumber.getText()));
+        phoneNumber = String.valueOf(binding.registerEDTPhoneNumber.getText());
         if (TextUtils.isEmpty(String.valueOf(phoneNumber))) {
             binding.registerPBProgressBar.setVisibility(View.GONE);
             Toast.makeText(RegisterActivity.this, "Enter Phone Number", Toast.LENGTH_SHORT).show();
@@ -242,30 +366,40 @@ public class RegisterActivity extends AppCompatActivity {
         }
         newUser.setPhoneNumber(this.phoneNumber);
 
-        binding.registerSPNAge.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                age = Integer.parseInt(parent.getItemAtPosition(position).toString());
-            }
+//        binding.registerSPNAge.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                age = Integer.parseInt(parent.getItemAtPosition(position).toString());
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//                // Leave empty or set age to default value
+//                age = 0;
+//            }
+//        });
+//        newUser.setAge(this.age);
+//
+//        binding.registerSPNGender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                gender = UserGenderEnum.valueOf(parent.getItemAtPosition(position).toString().toUpperCase());
+//
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//            }
+//        });
+//        newUser.setGender(this.gender);
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Leave empty or set age to default value
-                age = 0;
-            }
-        });
+        // Get age directly
+        age = Integer.parseInt(binding.registerSPNAge.getSelectedItem().toString());
         newUser.setAge(this.age);
 
-        binding.registerSPNGender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                gender = UserGenderEnum.valueOf(parent.getItemAtPosition(position).toString());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+        // Get gender directly
+        String selectedGender = binding.registerSPNGender.getSelectedItem().toString();
+        gender = UserGenderEnum.valueOf(selectedGender.toUpperCase());
         newUser.setGender(this.gender);
 
         if (selectedLanguagesList.isEmpty()) {
@@ -333,8 +467,12 @@ public class RegisterActivity extends AppCompatActivity {
         newUser.setPassword(this.password);
 
         if(role == UserRoleEnum.RECIPIENT){
+            //less then 1 KM
             lonLat.setLatitude(32.114059);
-            lonLat.setLongitude(34.798969);
+           lonLat.setLongitude(34.798969);
+            //more then 1 KM
+//            lonLat.setLatitude(34.886812);
+//            lonLat.setLongitude(32.15549);
         }
         else{
             lonLat.setLatitude(32.119885);
@@ -371,6 +509,7 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                 });
     }
+
 
     private void setNewUserInBackend(NewUser newUser){
         Call<User> call = apiService.createUser(newUser);

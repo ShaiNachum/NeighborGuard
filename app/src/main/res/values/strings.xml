@@ -33,4 +33,8 @@
     <string name="select_services">Select services</string>
     <string name="save">Save</string>
     <string name="i_am_ok">I AM OK 👍</string>
+    <string name="camera">CAMERA</string>
+    <string name="upload">UPLOAD</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
