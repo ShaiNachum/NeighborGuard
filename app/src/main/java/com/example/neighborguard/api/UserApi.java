@@ -20,8 +20,12 @@ public interface UserApi {
     @GET("/users")
     Call<SearchUsersResponseSchema> findUser(
             @Query("email") String email,
-            @Query("toExtendMeeting") boolean toExtendMeeting
-    );
+            @Query("toExtendMeeting") boolean toExtendMeeting,
+            @Query("role") String role,
+            @Query("filterByLat") Double filterByLat,
+            @Query("filterByLon") Double filterByLon,
+            @Query("isRequiredAssistance") boolean isRequiredAssistance
+    );;
 
     @PUT("users/{uid}")
     Call<Void> updateUser(

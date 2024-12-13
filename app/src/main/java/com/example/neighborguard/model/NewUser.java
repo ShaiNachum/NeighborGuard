@@ -16,7 +16,7 @@ public class NewUser {
     private String email;
     private String password;
     private LonLat lonLat;
-    private long lastOk;
+    private long lastOK;
     private String profileImage;
 
 
@@ -119,12 +119,12 @@ public class NewUser {
         this.lonLat = lonLat;
     }
 
-    public long getLastOk() {
-        return lastOk;
+    public long getLastOK() {
+        return lastOK;
     }
 
-    public void setLastOk(long lastOk) {
-        this.lastOk = lastOk;
+    public void setLastOK(long lastOK) {
+        this.lastOK = lastOK;
     }
 
     public String getProfileImage() {
@@ -150,7 +150,7 @@ public class NewUser {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", lonLat=" + lonLat +
-                ", lastOk=" + lastOk +
+                ", lastOK=" + lastOK +
                 ", profileImage='" + profileImage + '\'' +
                 '}';
     }

@@ -409,11 +409,6 @@ public class RegisterActivity extends AppCompatActivity {
         }
         newUser.setLanguages(selectedLanguagesList);
 
-        if (selectedServicesList.isEmpty()) {
-            binding.registerPBProgressBar.setVisibility(View.GONE);
-            Toast.makeText(RegisterActivity.this, "Please select at least one service", Toast.LENGTH_SHORT).show();
-            return;
-        }
         newUser.setServices(selectedServicesList);
 
         city = String.valueOf(binding.registerEDTCity.getText());

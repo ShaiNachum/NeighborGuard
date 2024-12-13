@@ -5,23 +5,18 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.ListFragment"
     android:orientation="vertical"
-    android:gravity="center"
-    android:background="@color/gray">
+    android:gravity="center">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/list_LBL_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="List Fragment"
-        android:layout_centerInParent="true"
-        android:textSize="40sp"
-        android:textStyle="bold"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list_LST_recipients"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/list_BTN_send"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Send"
-        android:layout_marginTop="8dp"/>
+<!--    <com.google.android.material.button.MaterialButton-->
+<!--        android:id="@+id/list_BTN_send"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Send"-->
+<!--        android:layout_marginTop="8dp"/>-->
 
 </androidx.appcompat.widget.LinearLayoutCompat>

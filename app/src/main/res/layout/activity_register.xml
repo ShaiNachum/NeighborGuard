@@ -127,14 +127,14 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="@color/bl"/>
+                        android:background="@color/textColorDay"/>
                     
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/camera"
                         android:textSize="16sp"
-                        android:textColor="@color/bl"
+                        android:textColor="@color/textColorDay"
                         android:layout_marginTop="4dp"
                         android:textStyle="bold"/>
 
@@ -172,14 +172,14 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="@color/bl"/>
+                        android:background="@color/textColorDay"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/upload"
                         android:textSize="16sp"
-                        android:textColor="@color/bl"
+                        android:textColor="@color/textColorDay"
                         android:layout_marginTop="4dp"
                         android:textStyle="bold"/>
 

@@ -14,8 +14,9 @@ import androidx.fragment.app.Fragment;
 import com.example.neighborguard.api.ApiController;
 import com.example.neighborguard.api.UserApi;
 import com.example.neighborguard.databinding.FragmentHomeBinding;
-import com.example.neighborguard.interfaces.Callback_recipientClicked;
+import com.example.neighborguard.interfaces.Callback_recipient;
 import com.example.neighborguard.model.CurrentUserManager;
+import com.example.neighborguard.model.ExtendedUser;
 import com.example.neighborguard.model.User;
 import com.example.neighborguard.model.UserRoleEnum;
 
@@ -62,10 +63,20 @@ public class HomeFragment extends Fragment {
                     .add(binding.homeVolunteerFRAMEList.getId(), listFragment)
                     .commit();
 
-            listFragment.setCallbackRecipientClicked(new Callback_recipientClicked() {
+            listFragment.setCallbackRecipientClicked(new Callback_recipient() {
                 @Override
                 public void recipientClicked(double lat, double lng) {
                     mapFragment.zoop(lat,lng);
+                }
+
+                @Override
+                public void recipientPicked(ExtendedUser extendedUser, int position) {
+
+                }
+
+                @Override
+                public void recipientCanceled(ExtendedUser extendedUser, int position) {
+
                 }
             });
 
@@ -92,7 +103,7 @@ public class HomeFragment extends Fragment {
         User user = currentUserManager.getUserFromExtendedUser();
 
         // Set the current time in seconds since epoch
-        user.setLastOk(System.currentTimeMillis() / 1000L);
+        user.setLastOK(System.currentTimeMillis() / 1000L);
 
         // Show progress bar while updating
         binding.homePBProgressBar.setVisibility(View.VISIBLE);
@@ -138,6 +149,8 @@ public class HomeFragment extends Fragment {
         }
         else{//is Recipient
             binding.homeRecipientBTNIAmOk.setVisibility(View.VISIBLE);
+            binding.homeVolunteerFRAMEList.setVisibility(View.GONE);
+            binding.homeRecipientFRAMEMap.setVisibility(View.GONE);
         }
     }
 

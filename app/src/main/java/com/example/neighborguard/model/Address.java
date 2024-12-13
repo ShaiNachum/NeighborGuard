@@ -15,6 +15,10 @@ public class Address {
         return String.format("%d %s, %s, Israel", houseNumber, street, city);
     }
 
+    public String getAddressString(){
+        return String.format("%d %s, %s, Israel", houseNumber, street, city);
+    }
+
     public String getCity() {
         return city;
     }

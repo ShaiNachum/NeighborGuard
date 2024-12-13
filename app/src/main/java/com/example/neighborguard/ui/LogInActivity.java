@@ -128,7 +128,15 @@ public class LogInActivity extends AppCompatActivity {
 
 
     private void getUserByEmail(String email){
-        Call<SearchUsersResponseSchema> call = apiService.findUser(email, true);
+        //Call<SearchUsersResponseSchema> call = apiService.findUser(email, true);
+        Call<SearchUsersResponseSchema> call = apiService.findUser(
+                email,              // email to find specific user
+                true,              // toExtendMeeting - to get user's meetings
+                null,              // role - not filtering by role during login
+                null,              // filterByLat - no location filtering during login
+                null,              // filterByLon - no location filtering during login
+                false              // isRequiredAssistance - not checking for assistance during login
+        );
 
         call.enqueue(new Callback<SearchUsersResponseSchema>() {
             @Override

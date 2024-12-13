@@ -36,7 +36,8 @@ public class CurrentUserManager {
         newUser.setEmail(user.getEmail());
         newUser.setPassword(user.getPassword());
         newUser.setLonLat(user.getLonLat());
-        newUser.setLastOk(user.getLastOk());
+        newUser.setLastOK(user.getLastOK());
+        newUser.setProfileImage(user.getProfileImage());
         newUser.setUid(user.getUid());
         newUser.setMeetings(this.user.getMeetings());
         this.user = newUser;
@@ -56,7 +57,8 @@ public class CurrentUserManager {
         user.setEmail(this.user.getEmail());
         user.setPassword(this.user.getPassword());
         user.setLonLat(this.user.getLonLat());
-        user.setLastOk(this.user.getLastOk());
+        user.setLastOK(this.user.getLastOK());
+        user.setProfileImage(this.user.getProfileImage());
         user.setUid(this.user.getUid());
         return user;
     }

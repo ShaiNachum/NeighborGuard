@@ -6,7 +6,7 @@
     tools:context=".ui.home.MapFragment"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@color/green500">
+    android:background="@color/gray">
 
 
     <com.google.android.material.textview.MaterialTextView
