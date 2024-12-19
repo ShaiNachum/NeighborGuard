@@ -23,6 +23,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
+import com.example.neighborguard.R;
 import com.example.neighborguard.api.ApiController;
 import com.example.neighborguard.api.UserApi;
 import com.example.neighborguard.databinding.FragmentSettingsBinding;
@@ -30,6 +32,7 @@ import com.example.neighborguard.model.Address;
 import com.example.neighborguard.model.CurrentUserManager;
 import com.example.neighborguard.model.LonLat;
 import com.example.neighborguard.model.User;
+import com.example.neighborguard.model.UserRoleEnum;
 import com.example.neighborguard.ui.LogInActivity;
 import com.example.neighborguard.utils.DialogUtils;
 import com.google.firebase.auth.FirebaseAuth;
@@ -169,12 +172,39 @@ public class SettingsFragment extends Fragment{
         if(getActivity() == null) return;
 
         if(resultCode == Activity.RESULT_OK && data != null) {
+//            if(requestCode == CAM_REQ) {
+//                try {
+//                    Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+//                    if(bitmap != null) {
+//                        binding.settingIMGProfile.setImageBitmap(bitmap);
+//                        base64ProfileImage = convertBitmapToBase64(bitmap);
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    Toast.makeText(getActivity(), "Failed to capture image", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//            else if(requestCode == IMG_REQ) {
+//                try {
+//                    Uri imageUri = data.getData();
+//                    if(imageUri != null) {
+//                        binding.settingIMGProfile.setImageURI(imageUri);
+//                        base64ProfileImage = convertUriToBase64(imageUri);
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    Toast.makeText(getActivity(), "Failed to load image", Toast.LENGTH_SHORT).show();
+//                }
+//            }
             if(requestCode == CAM_REQ) {
                 try {
                     Bitmap bitmap = (Bitmap) data.getExtras().get("data");
                     if(bitmap != null) {
-                        binding.settingIMGProfile.setImageBitmap(bitmap);
                         base64ProfileImage = convertBitmapToBase64(bitmap);
+                        Glide.with(requireContext())
+                                .load(bitmap)
+                                .circleCrop()
+                                .into(binding.settingIMGProfile);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -185,8 +215,11 @@ public class SettingsFragment extends Fragment{
                 try {
                     Uri imageUri = data.getData();
                     if(imageUri != null) {
-                        binding.settingIMGProfile.setImageURI(imageUri);
                         base64ProfileImage = convertUriToBase64(imageUri);
+                        Glide.with(requireContext())
+                                .load(imageUri)
+                                .circleCrop()
+                                .into(binding.settingIMGProfile);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -240,17 +273,35 @@ public class SettingsFragment extends Fragment{
 
     private void initHintsFromCurrentUser() {
         base64ProfileImage = currentUserManager.getUser().getProfileImage();
+//        if (base64ProfileImage != null && !base64ProfileImage.isEmpty()) {
+//            Bitmap bitmap = base64ToBitmap(base64ProfileImage);
+//            if (bitmap != null) {
+//                binding.settingIMGProfile.setImageBitmap(bitmap);
+//            }
+//        }
         if (base64ProfileImage != null && !base64ProfileImage.isEmpty()) {
-            Bitmap bitmap = base64ToBitmap(base64ProfileImage);
-            if (bitmap != null) {
-                binding.settingIMGProfile.setImageBitmap(bitmap);
-            }
+            Glide.with(requireContext())
+                    .load(Base64.decode(base64ProfileImage, Base64.DEFAULT))
+                    .placeholder(R.drawable.ic_profile_image_24)
+                    .error(R.drawable.ic_profile_image_24)
+                    .circleCrop()
+                    .into(binding.settingIMGProfile);
         }
+
         binding.settingsEDTFirstName.setText(currentUserManager.getUser().getFirstName());
         binding.settingsEDTLastName.setText(String.valueOf(currentUserManager.getUser().getLastName()));
         binding.settingsEDTPhoneNumber.setText(String.valueOf(currentUserManager.getUser().getPhoneNumber()));
         binding.settingsLBLSelectLanguages.setText(String.valueOf(currentUserManager.getUser().getLanguages()));
-        binding.settingsLBLSelectServices.setText(String.valueOf(currentUserManager.getUser().getServices()));
+
+        // Hide services selection if user is RECIPIENT
+        if (currentUserManager.getUser().getRole() == UserRoleEnum.RECIPIENT) {
+            binding.settingsLBLServices.setVisibility(View.GONE);
+            binding.settingsLBLSelectServices.setVisibility(View.GONE);
+        }
+        else{
+            binding.settingsLBLSelectServices.setText(String.valueOf(currentUserManager.getUser().getServices()));
+        }
+
         binding.settingsEDTCity.setText(currentUserManager.getUser().getAddress().getCity());
         binding.settingsEDTStreet.setText(currentUserManager.getUser().getAddress().getStreet());
         binding.settingsEDTHouseNumber.setText(String.valueOf(currentUserManager.getUser().getAddress().getHouseNumber()));

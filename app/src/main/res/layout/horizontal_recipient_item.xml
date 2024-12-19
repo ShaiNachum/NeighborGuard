@@ -4,14 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="8dp"
-    >
-
+    android:layout_marginVertical="8dp">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/recipient_CARD_image"
-        android:layout_width="120dp"
-        android:layout_height="180dp"
+        android:layout_width="@dimen/recipient_image_card_width_collapsed"
+        android:layout_height="@dimen/recipient_image_card_height_collapsed"
         app:cardCornerRadius="20dp"
         android:elevation="10dp"
         app:cardElevation="10dp"
@@ -36,16 +34,17 @@
         app:cardCornerRadius="20dp"
         android:elevation="8dp"
         app:cardElevation="8dp"
-        android:layout_marginStart="68dp"
+        android:layout_marginStart="@dimen/recipient_data_card_margin_start_collapsed"
         android:layout_marginEnd="8dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <RelativeLayout
+            android:id="@+id/data_relative_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="60dp">
+            android:layout_marginStart="@dimen/recipient_data_content_margin_start_collapsed">
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/recipient_LBL_name"
@@ -58,10 +57,8 @@
                 android:minLines="1"
                 android:maxLines="2"
                 tools:text="Name: "
-                android:textSize="@dimen/item_text_size"
-                android:textStyle="bold"
-                />
-
+                android:textSize="@dimen/recipient_text_size"
+                android:textStyle="bold"/>
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/recipient_LBL_lastOk"
@@ -73,11 +70,9 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginEnd="5dp"
                 android:layout_marginStart="5dp"
-                android:layout_toStartOf="@+id/recipient_IMG_check"
                 tools:text="Last OK: "
-                android:textSize="@dimen/item_text_size"
-                android:textStyle="bold"
-                />
+                android:textSize="@dimen/recipient_text_size"
+                android:textStyle="bold"/>
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/recipient_LBL_service"
@@ -90,99 +85,96 @@
                 android:layout_marginEnd="5dp"
                 android:layout_marginStart="5dp"
                 tools:text="Services: "
-                android:textSize="@dimen/item_text_size"
-                android:textStyle="bold"
-                />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/recipient_LBL_phone"
-                android:layout_below="@+id/recipient_LBL_service"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minLines="1"
-                android:maxLines="1"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
-                android:layout_marginStart="5dp"
-                tools:text="Phone: "
-                android:textSize="@dimen/item_text_size"
-                android:textStyle="bold"
-
-                />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/recipient_LBL_address"
-                android:layout_below="@+id/recipient_LBL_phone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minLines="1"
-                android:maxLines="2"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
-                android:layout_marginStart="5dp"
-                tools:text="Address: "
-                android:textSize="@dimen/item_text_size"
-                android:textStyle="bold"
-                />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/recipient_LBL_distance"
-                android:layout_below="@+id/recipient_LBL_address"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minLines="1"
-                android:maxLines="1"
-                android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
-                android:layout_marginStart="5dp"
-                tools:text="Distance: "
-                android:textSize="@dimen/item_text_size"
-                android:textStyle="bold"
-                />
-
-
+                android:textSize="@dimen/recipient_text_size"
+                android:textStyle="bold"/>
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/recipient_IMG_check"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="@dimen/recipient_check_icon_size_collapsed"
+                android:layout_height="@dimen/recipient_check_icon_size_collapsed"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
-                app:srcCompat="@drawable/ic_black_check"
-                />
+                android:layout_marginEnd="8dp"
+                app:srcCompat="@drawable/ic_black_check"/>
 
             <LinearLayout
-                android:layout_below="@+id/recipient_LBL_distance"
-                android:layout_width="wrap_content"
+                android:id="@+id/expandableContent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_centerInParent="true"
-                android:orientation="horizontal">
+                android:layout_below="@id/recipient_LBL_service"
+                android:orientation="vertical"
+                android:visibility="gone">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/recipient_BTN_pick"
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/recipient_LBL_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="1"
+                    android:maxLines="1"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginStart="5dp"
+                    tools:text="Phone: "
+                    android:textSize="@dimen/recipient_text_size"
+                    android:textStyle="bold"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/recipient_LBL_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="1"
+                    android:maxLines="2"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginStart="5dp"
+                    tools:text="Address: "
+                    android:textSize="@dimen/recipient_text_size"
+                    android:textStyle="bold"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/recipient_LBL_distance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="1"
+                    android:maxLines="1"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginStart="5dp"
+                    tools:text="Distance: "
+                    android:textSize="@dimen/recipient_text_size"
+                    android:textStyle="bold"/>
+
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:text="Pick"
-                    android:textSize="@dimen/item_text_size"
-                    android:textStyle="bold"
-                    android:backgroundTint="@color/greenA400"
-                    />
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
 
-                <View
-                    android:layout_width="8dp"
-                    android:layout_height="0dp"/>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/recipient_BTN_pick"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:text="Pick"
+                        android:textSize="@dimen/recipient_text_size"
+                        android:textStyle="bold"
+                        android:backgroundTint="@color/greenA400"/>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/recipient_BTN_cancel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:text="cancel"
-                    android:textSize="@dimen/item_text_size"
-                    android:textStyle="bold"
-                    android:backgroundTint="@color/redA400"/>
+                    <View
+                        android:layout_width="8dp"
+                        android:layout_height="0dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/recipient_BTN_cancel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:text="cancel"
+                        android:textSize="@dimen/recipient_text_size"
+                        android:textStyle="bold"
+                        android:backgroundTint="@color/redA400"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 

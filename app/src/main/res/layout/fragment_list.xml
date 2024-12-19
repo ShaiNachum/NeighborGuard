@@ -5,12 +5,14 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.ListFragment"
     android:orientation="vertical"
-    android:gravity="center">
+    android:gravity="center"
+    android:background="@drawable/pearl_gradient" >
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list_LST_recipients"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        />
 
 <!--    <com.google.android.material.button.MaterialButton-->
 <!--        android:id="@+id/list_BTN_send"-->

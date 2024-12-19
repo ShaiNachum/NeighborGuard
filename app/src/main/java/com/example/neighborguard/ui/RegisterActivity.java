@@ -15,12 +15,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.neighborguard.MainActivity;
 import com.example.neighborguard.api.ApiController;
 import com.example.neighborguard.api.UserApi;
@@ -130,10 +132,26 @@ public class RegisterActivity extends AppCompatActivity {
         binding.registerCRDCamera.setOnClickListener(View -> cameraClicked());
         binding.registerCRDPhotos.setOnClickListener(View -> photosClicked());
 
+        binding.registerRGPRole.setOnCheckedChangeListener((group, checkedId) -> roleChanged(group, checkedId));
+
         initAges();
         initGenders();
         initLanguages();
         initServices();
+    }
+
+    private void roleChanged(RadioGroup group, int checkedId) {
+        if (checkedId == binding.registerRDBVolunteer.getId()) {
+            binding.registerLBLSelectServices.setVisibility(View.VISIBLE);
+            binding.registerLBLServices.setVisibility(View.VISIBLE);
+        } else {
+            binding.registerLBLSelectServices.setVisibility(View.GONE);
+            binding.registerLBLServices.setVisibility(View.GONE);
+            // Clear selected services when switching to recipient
+            selectedServicesList.clear();
+            selectedServices = new boolean[servicesArray.length];
+            binding.registerLBLSelectServices.setText("Select Services");
+        }
     }
 
 
@@ -169,12 +187,39 @@ public class RegisterActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(resultCode == RESULT_OK && data != null) {  // Changed from requestCode to resultCode
+//            if(requestCode == CAM_REQ) {
+//                try {
+//                    Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+//                    if(bitmap != null) {
+//                        binding.registerIMGProfile.setImageBitmap(bitmap);
+//                        base64ProfileImage = convertBitmapToBase64(bitmap);
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    Toast.makeText(this, "Failed to capture image", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//            else if(requestCode == IMG_REQ) {
+//                try {
+//                    Uri imageUri = data.getData();
+//                    if(imageUri != null) {
+//                        binding.registerIMGProfile.setImageURI(imageUri);
+//                        base64ProfileImage = convertUriToBase64(imageUri);
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
+//                }
+//            }
             if(requestCode == CAM_REQ) {
                 try {
                     Bitmap bitmap = (Bitmap) data.getExtras().get("data");
                     if(bitmap != null) {
-                        binding.registerIMGProfile.setImageBitmap(bitmap);
                         base64ProfileImage = convertBitmapToBase64(bitmap);
+                        Glide.with(this)
+                                .load(bitmap)
+                                .circleCrop()
+                                .into(binding.registerIMGProfile);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -185,8 +230,11 @@ public class RegisterActivity extends AppCompatActivity {
                 try {
                     Uri imageUri = data.getData();
                     if(imageUri != null) {
-                        binding.registerIMGProfile.setImageURI(imageUri);
                         base64ProfileImage = convertUriToBase64(imageUri);
+                        Glide.with(this)
+                                .load(imageUri)
+                                .circleCrop()
+                                .into(binding.registerIMGProfile);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -366,32 +414,6 @@ public class RegisterActivity extends AppCompatActivity {
         }
         newUser.setPhoneNumber(this.phoneNumber);
 
-//        binding.registerSPNAge.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                age = Integer.parseInt(parent.getItemAtPosition(position).toString());
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//                // Leave empty or set age to default value
-//                age = 0;
-//            }
-//        });
-//        newUser.setAge(this.age);
-//
-//        binding.registerSPNGender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                gender = UserGenderEnum.valueOf(parent.getItemAtPosition(position).toString().toUpperCase());
-//
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//            }
-//        });
-//        newUser.setGender(this.gender);
 
         // Get age directly
         age = Integer.parseInt(binding.registerSPNAge.getSelectedItem().toString());

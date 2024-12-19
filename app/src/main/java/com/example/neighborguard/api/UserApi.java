@@ -1,6 +1,5 @@
 package com.example.neighborguard.api;
 
-import com.example.neighborguard.model.ExtendedUser;
 import com.example.neighborguard.model.NewUser;
 import com.example.neighborguard.model.SearchUsersResponseSchema;
 import com.example.neighborguard.model.User;
@@ -12,6 +11,9 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+
+
+
 
 public interface UserApi {
     @POST("/users")
@@ -34,24 +36,3 @@ public interface UserApi {
     );
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//    @GET("admin/users")
-//    Call<User[]> getAllUsers(
-//            @Query("userSuperapp") String userSuperapp,
-//            @Query("userEmail") String userEmail,
-//            @Query("size") int size,
-//            @Query("page") int page
-//    );

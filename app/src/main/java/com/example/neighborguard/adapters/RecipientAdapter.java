@@ -1,14 +1,16 @@
 package com.example.neighborguard.adapters;
 
 import android.content.Context;
-import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.neighborguard.R;
 import com.example.neighborguard.interfaces.Callback_recipient;
 import com.example.neighborguard.model.CurrentUserManager;
@@ -20,6 +22,8 @@ import com.google.android.material.textview.MaterialTextView;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 
@@ -30,6 +34,9 @@ public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.Reci
     private Callback_recipient callbackRecipient;
     private ArrayList<ExtendedUser> recipients;
     private CurrentUserManager currentUserManager;
+
+    private SparseBooleanArray expandedItems = new SparseBooleanArray();
+
 
     public RecipientAdapter(Context context, ArrayList<ExtendedUser> recipients) {
         this.context = context;
@@ -51,41 +58,88 @@ public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.Reci
     @Override
     public void onBindViewHolder(@NonNull RecipientAdapter.RecipientViewHolder holder, int position) {
         ExtendedUser recipient = recipients.get(position);
+        boolean isExpanded = expandedItems.get(position, false);
 
-        // Set recipient name
+        setExpandableContent(holder, isExpanded);
+
+        // Always show name and last OK
         holder.recipient_LBL_name.setText("Name: " + recipient.getFirstName() + " " + recipient.getLastName());
 
-        // Set phone number
-        holder.recipient_LBL_phone.setText("Phone: " + recipient.getPhoneNumber());
-
-        // Set address
-        holder.recipient_LBL_address.setText("Address: " + recipient.getAddress().getAddressString());
-
-        // Set distance
-        holder.recipient_LBL_distance.setText(getDistanceText(recipient));
-
-        // Set services
-        holder.recipient_LBL_service.setText(getServicesText(recipient));
-
-        // Set last OK time
-        long currentTime = System.currentTimeMillis() / 1000L; // Current Unix time in seconds
+        long currentTime = System.currentTimeMillis() / 1000L;
         long lastOkTime = recipient.getLastOK();
         long timeSinceLastOk = currentTime - lastOkTime;
-
         String timeAgoText = formatTimeAgo(timeSinceLastOk);
         holder.recipient_LBL_lastOk.setText("Last OK: " + timeAgoText);
 
+        holder.recipient_LBL_service.setText(getServicesText(recipient));
+
         // Set profile image if exists
+//        if (recipient.getProfileImage() != null && !recipient.getProfileImage().isEmpty()) {
+//            try {
+//                byte[] decodedString = Base64.decode(recipient.getProfileImage(), Base64.DEFAULT);
+//                Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+//                holder.recipient_IMG_image.setImageBitmap(bitmap);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                holder.recipient_IMG_image.setImageResource(R.drawable.ic_profile_image_24);
+//            }
+//        }
         if (recipient.getProfileImage() != null && !recipient.getProfileImage().isEmpty()) {
-            try {
-                byte[] decodedString = Base64.decode(recipient.getProfileImage(), Base64.DEFAULT);
-                Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                holder.recipient_IMG_image.setImageBitmap(bitmap);
-            } catch (Exception e) {
-                e.printStackTrace();
-                holder.recipient_IMG_image.setImageResource(R.drawable.ic_profile_image_24);
-            }
+            Glide.with(context)
+                    .load(Base64.decode(recipient.getProfileImage(), Base64.DEFAULT))
+                    .placeholder(R.drawable.ic_profile_image_24)
+                    .error(R.drawable.ic_profile_image_24)
+                    .circleCrop()
+                    .into(holder.recipient_IMG_image);
+        } else {
+            holder.recipient_IMG_image.setImageResource(R.drawable.ic_profile_image_24);
         }
+
+        if (isExpanded) {
+            holder.recipient_LBL_phone.setText("Phone: " + recipient.getPhoneNumber());
+            holder.recipient_LBL_address.setText("Address: " + recipient.getAddress().getAddressString());
+            holder.recipient_LBL_distance.setText(getDistanceText(recipient));
+        }
+
+        // Set click listener for expansion
+        holder.itemView.setOnClickListener(v -> {
+            expandedItems.put(position, !isExpanded);
+            notifyItemChanged(position);
+        });
+    }
+
+
+    private void setExpandableContent(RecipientViewHolder holder, boolean isExpanded) {
+        // Update image card size
+        ViewGroup.LayoutParams imageParams = holder.recipient_CARD_image.getLayoutParams();
+        imageParams.width = context.getResources().getDimensionPixelSize(
+                isExpanded ? R.dimen.recipient_image_card_width_expanded : R.dimen.recipient_image_card_width_collapsed);
+        imageParams.height = context.getResources().getDimensionPixelSize(
+                isExpanded ? R.dimen.recipient_image_card_height_expanded : R.dimen.recipient_image_card_height_collapsed);
+        holder.recipient_CARD_image.setLayoutParams(imageParams);
+
+        // Update margins for data card
+        ViewGroup.MarginLayoutParams dataParams = (ViewGroup.MarginLayoutParams) holder.recipient_CARD_data.getLayoutParams();
+        dataParams.setMarginStart(context.getResources().getDimensionPixelSize(
+                isExpanded ? R.dimen.recipient_data_card_margin_start_expanded : R.dimen.recipient_data_card_margin_start_collapsed));
+        holder.recipient_CARD_data.setLayoutParams(dataParams);
+
+        // Update RelativeLayout margins
+        ViewGroup.MarginLayoutParams relativeParams = (ViewGroup.MarginLayoutParams) holder.dataRelativeLayout.getLayoutParams();
+        relativeParams.setMarginStart(context.getResources().getDimensionPixelSize(
+                isExpanded ? R.dimen.recipient_data_content_margin_start_expanded : R.dimen.recipient_data_content_margin_start_collapsed));
+        holder.dataRelativeLayout.setLayoutParams(relativeParams);
+
+        // Update check image size
+        ViewGroup.LayoutParams checkParams = holder.recipient_IMG_check.getLayoutParams();
+        int checkSize = context.getResources().getDimensionPixelSize(
+                isExpanded ? R.dimen.recipient_check_icon_size_expanded : R.dimen.recipient_check_icon_size_collapsed);
+        checkParams.width = checkSize;
+        checkParams.height = checkSize;
+        holder.recipient_IMG_check.setLayoutParams(checkParams);
+
+        // Set expandable content visibility
+        holder.expandableContent.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
     }
 
 
@@ -224,11 +278,22 @@ public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.Reci
         private MaterialButton recipient_BTN_pick;
         private MaterialButton recipient_BTN_cancel;
 
+        private LinearLayout expandableContent;
+        private CardView recipient_CARD_image;  // Add this line
+        private CardView recipient_CARD_data;
+        private RelativeLayout dataRelativeLayout;
+
 
 
         public RecipientViewHolder(@NonNull View itemView) {
             super(itemView);
-             recipient_IMG_image = itemView.findViewById(R.id.recipient_IMG_image);
+            expandableContent = itemView.findViewById(R.id.expandableContent);
+            recipient_CARD_image = itemView.findViewById(R.id.recipient_CARD_image);
+            recipient_CARD_data = itemView.findViewById(R.id.recipient_CARD_data);
+            dataRelativeLayout = recipient_CARD_data.findViewById(R.id.data_relative_layout);
+
+
+            recipient_IMG_image = itemView.findViewById(R.id.recipient_IMG_image);
              recipient_LBL_name = itemView.findViewById(R.id.recipient_LBL_name);
              recipient_LBL_phone = itemView.findViewById(R.id.recipient_LBL_phone);
              recipient_LBL_address = itemView.findViewById(R.id.recipient_LBL_address);
