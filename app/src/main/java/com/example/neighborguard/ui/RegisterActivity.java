@@ -1,7 +1,5 @@
 package com.example.neighborguard.ui;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -13,7 +11,6 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -23,18 +20,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
-import com.example.neighborguard.MainActivity;
 import com.example.neighborguard.api.ApiController;
 import com.example.neighborguard.api.UserApi;
 import com.example.neighborguard.databinding.ActivityRegisterBinding;
 import com.example.neighborguard.model.Address;
-import com.example.neighborguard.model.CurrentUserManager;
-import com.example.neighborguard.model.ExtendedUser;
 import com.example.neighborguard.model.LonLat;
 import com.example.neighborguard.model.NewUser;
 import com.example.neighborguard.model.User;
-import com.example.neighborguard.model.UserGenderEnum;
-import com.example.neighborguard.model.UserRoleEnum;
+import com.example.neighborguard.enums.UserAssistanceStatusEnum;
+import com.example.neighborguard.enums.UserGenderEnum;
+import com.example.neighborguard.enums.UserRoleEnum;
 import com.example.neighborguard.utils.DialogUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -88,6 +83,8 @@ public class RegisterActivity extends AppCompatActivity {
     private String password;
 
     private LonLat lonLat;
+
+    private long lastOK;
 
     private final int CAM_REQ = 1000;
     private final int IMG_REQ = 2000;
@@ -187,30 +184,6 @@ public class RegisterActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(resultCode == RESULT_OK && data != null) {  // Changed from requestCode to resultCode
-//            if(requestCode == CAM_REQ) {
-//                try {
-//                    Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-//                    if(bitmap != null) {
-//                        binding.registerIMGProfile.setImageBitmap(bitmap);
-//                        base64ProfileImage = convertBitmapToBase64(bitmap);
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                    Toast.makeText(this, "Failed to capture image", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//            else if(requestCode == IMG_REQ) {
-//                try {
-//                    Uri imageUri = data.getData();
-//                    if(imageUri != null) {
-//                        binding.registerIMGProfile.setImageURI(imageUri);
-//                        base64ProfileImage = convertUriToBase64(imageUri);
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                    Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
-//                }
-//            }
             if(requestCode == CAM_REQ) {
                 try {
                     Bitmap bitmap = (Bitmap) data.getExtras().get("data");
@@ -485,17 +458,23 @@ public class RegisterActivity extends AppCompatActivity {
 
         if(role == UserRoleEnum.RECIPIENT){
             //less then 1 KM
-            lonLat.setLatitude(32.114059);
-           lonLat.setLongitude(34.798969);
+            //lonLat.setLatitude(32.114059);
+            //lonLat.setLongitude(34.798969);
             //more then 1 KM
-//            lonLat.setLatitude(34.886812);
-//            lonLat.setLongitude(32.15549);
+            lonLat.setLatitude(34.886812);
+            lonLat.setLongitude(32.15549);
         }
         else{
             lonLat.setLatitude(32.119885);
             lonLat.setLongitude(34.800303);
         }
         newUser.setLonLat(lonLat);
+
+        // Set the current time in seconds since epoch
+        newUser.setLastOK(System.currentTimeMillis() / 1000L);
+
+        // Set the assistance status to DO_NOT_NEED_ASSISTANCE
+        newUser.setAssistanceStatus(UserAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE);
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {

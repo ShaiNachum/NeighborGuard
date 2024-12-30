@@ -34,7 +34,6 @@ public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.Reci
     private Callback_recipient callbackRecipient;
     private ArrayList<ExtendedUser> recipients;
     private CurrentUserManager currentUserManager;
-
     private SparseBooleanArray expandedItems = new SparseBooleanArray();
 
 
@@ -73,23 +72,12 @@ public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.Reci
 
         holder.recipient_LBL_service.setText(getServicesText(recipient));
 
-        // Set profile image if exists
-//        if (recipient.getProfileImage() != null && !recipient.getProfileImage().isEmpty()) {
-//            try {
-//                byte[] decodedString = Base64.decode(recipient.getProfileImage(), Base64.DEFAULT);
-//                Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-//                holder.recipient_IMG_image.setImageBitmap(bitmap);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                holder.recipient_IMG_image.setImageResource(R.drawable.ic_profile_image_24);
-//            }
-//        }
         if (recipient.getProfileImage() != null && !recipient.getProfileImage().isEmpty()) {
             Glide.with(context)
                     .load(Base64.decode(recipient.getProfileImage(), Base64.DEFAULT))
                     .placeholder(R.drawable.ic_profile_image_24)
                     .error(R.drawable.ic_profile_image_24)
-                    .circleCrop()
+                    .centerCrop()
                     .into(holder.recipient_IMG_image);
         } else {
             holder.recipient_IMG_image.setImageResource(R.drawable.ic_profile_image_24);

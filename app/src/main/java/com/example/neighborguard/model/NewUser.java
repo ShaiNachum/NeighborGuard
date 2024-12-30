@@ -1,5 +1,9 @@
 package com.example.neighborguard.model;
 
+import com.example.neighborguard.enums.UserAssistanceStatusEnum;
+import com.example.neighborguard.enums.UserGenderEnum;
+import com.example.neighborguard.enums.UserRoleEnum;
+
 import java.util.ArrayList;
 
 
@@ -18,6 +22,7 @@ public class NewUser {
     private LonLat lonLat;
     private long lastOK;
     private String profileImage;
+    private UserAssistanceStatusEnum assistanceStatus;
 
 
     public NewUser() {
@@ -135,6 +140,14 @@ public class NewUser {
         this.profileImage = profileImage;
     }
 
+    public UserAssistanceStatusEnum getAssistanceStatus() {
+        return assistanceStatus;
+    }
+
+    public void setAssistanceStatus(UserAssistanceStatusEnum assistanceStatus) {
+        this.assistanceStatus = assistanceStatus;
+    }
+
     @Override
     public String toString() {
         return "NewUser{" +
@@ -152,6 +165,7 @@ public class NewUser {
                 ", lonLat=" + lonLat +
                 ", lastOK=" + lastOK +
                 ", profileImage='" + profileImage + '\'' +
+                ", assistanceStatus=" + assistanceStatus +
                 '}';
     }
 }

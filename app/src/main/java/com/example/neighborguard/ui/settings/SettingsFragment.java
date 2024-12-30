@@ -1,8 +1,6 @@
 package com.example.neighborguard.ui.settings;
 
 import android.app.Activity;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -32,7 +30,7 @@ import com.example.neighborguard.model.Address;
 import com.example.neighborguard.model.CurrentUserManager;
 import com.example.neighborguard.model.LonLat;
 import com.example.neighborguard.model.User;
-import com.example.neighborguard.model.UserRoleEnum;
+import com.example.neighborguard.enums.UserRoleEnum;
 import com.example.neighborguard.ui.LogInActivity;
 import com.example.neighborguard.utils.DialogUtils;
 import com.google.firebase.auth.FirebaseAuth;

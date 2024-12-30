@@ -38,6 +38,7 @@ public class CurrentUserManager {
         newUser.setLonLat(user.getLonLat());
         newUser.setLastOK(user.getLastOK());
         newUser.setProfileImage(user.getProfileImage());
+        newUser.setAssistanceStatus(user.getAssistanceStatus());
         newUser.setUid(user.getUid());
         newUser.setMeetings(this.user.getMeetings());
         this.user = newUser;
@@ -59,6 +60,7 @@ public class CurrentUserManager {
         user.setLonLat(this.user.getLonLat());
         user.setLastOK(this.user.getLastOK());
         user.setProfileImage(this.user.getProfileImage());
+        user.setAssistanceStatus(this.user.getAssistanceStatus());
         user.setUid(this.user.getUid());
         return user;
     }

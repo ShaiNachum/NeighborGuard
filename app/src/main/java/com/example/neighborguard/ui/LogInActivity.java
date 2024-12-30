@@ -127,36 +127,60 @@ public class LogInActivity extends AppCompatActivity {
     }
 
 
-    private void getUserByEmail(String email){
-        //Call<SearchUsersResponseSchema> call = apiService.findUser(email, true);
-        Call<SearchUsersResponseSchema> call = apiService.findUser(
-                email,              // email to find specific user
-                true,              // toExtendMeeting - to get user's meetings
-                null,              // role - not filtering by role during login
-                null,              // filterByLat - no location filtering during login
-                null,              // filterByLon - no location filtering during login
-                false              // isRequiredAssistance - not checking for assistance during login
-        );
+//    private void getUserByEmail(String email){
+//        //Call<SearchUsersResponseSchema> call = apiService.findUser(email, true);
+//        Call<SearchUsersResponseSchema> call = apiService.findUser(
+//                email,              // email to find specific user
+//                true,              // toExtendMeeting - to get user's meetings
+//                null,              // role - not filtering by role during login
+//                null,              // filterByLat - no location filtering during login
+//                null,              // filterByLon - no location filtering during login
+//                false              // isRequiredAssistance - not checking for assistance during login
+//        );
+//
+//        call.enqueue(new Callback<SearchUsersResponseSchema>() {
+//            @Override
+//            public void onResponse(Call<SearchUsersResponseSchema> call, Response<SearchUsersResponseSchema> response) {
+//                SearchUsersResponseSchema responseBody = response.body();
+//                if (responseBody == null) {
+//                    throw new IllegalArgumentException("null response body");
+//                }
+//                ExtendedUser user = responseBody.getFirstExtendedUser();
+//
+//                if (response.isSuccessful()  && user != null) {
+//                    Toast.makeText(LogInActivity.this, "Hello " + user.getEmail(), Toast.LENGTH_LONG).show();
+//                    switchToMainActivity(user);
+//                } else {
+//                    //Log.e("Retrofit", "Failed to retrieve user. Error code: " + response.code());
+//                    Toast.makeText(LogInActivity.this, "Failed to log in ", Toast.LENGTH_LONG).show();
+//                }
+//            }
+//            @Override
+//            public void onFailure(Call<SearchUsersResponseSchema> call, Throwable t) {
+//                Log.e("Retrofit", "Network error or failure: " + t.getMessage());
+//                Toast.makeText(LogInActivity.this, "SHIT HAPPENS ;)", Toast.LENGTH_LONG).show();
+//            }
+//        });
+//    }
 
-        call.enqueue(new Callback<SearchUsersResponseSchema>() {
+    // new 25/12
+    private void getUserByEmail(String email) {
+        Call<ExtendedUser> call = apiService.getUserByEmail(email, true);
+
+        call.enqueue(new Callback<ExtendedUser>() {
             @Override
-            public void onResponse(Call<SearchUsersResponseSchema> call, Response<SearchUsersResponseSchema> response) {
-                SearchUsersResponseSchema responseBody = response.body();
-                if (responseBody == null) {
-                    throw new IllegalArgumentException("null response body");
-                }
-                ExtendedUser user = responseBody.getFirstExtendedUser();
-
-                if (response.isSuccessful()  && user != null) {
+            public void onResponse(Call<ExtendedUser> call, Response<ExtendedUser> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ExtendedUser user = response.body();
                     Toast.makeText(LogInActivity.this, "Hello " + user.getEmail(), Toast.LENGTH_LONG).show();
                     switchToMainActivity(user);
                 } else {
-                    //Log.e("Retrofit", "Failed to retrieve user. Error code: " + response.code());
                     Toast.makeText(LogInActivity.this, "Failed to log in ", Toast.LENGTH_LONG).show();
                 }
             }
+
             @Override
-            public void onFailure(Call<SearchUsersResponseSchema> call, Throwable t) {
+            public void onFailure(Call<ExtendedUser> call, Throwable t) {
                 Log.e("Retrofit", "Network error or failure: " + t.getMessage());
                 Toast.makeText(LogInActivity.this, "SHIT HAPPENS ;)", Toast.LENGTH_LONG).show();
             }

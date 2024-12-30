@@ -18,7 +18,8 @@ import com.example.neighborguard.interfaces.Callback_recipient;
 import com.example.neighborguard.model.CurrentUserManager;
 import com.example.neighborguard.model.ExtendedUser;
 import com.example.neighborguard.model.User;
-import com.example.neighborguard.model.UserRoleEnum;
+import com.example.neighborguard.enums.UserAssistanceStatusEnum;
+import com.example.neighborguard.enums.UserRoleEnum;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -104,6 +105,9 @@ public class HomeFragment extends Fragment {
 
         // Set the current time in seconds since epoch
         user.setLastOK(System.currentTimeMillis() / 1000L);
+
+        // Set the assistance status to DO_NOT_NEED_ASSISTANCE
+        user.setAssistanceStatus(UserAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE);
 
         // Show progress bar while updating
         binding.homePBProgressBar.setVisibility(View.VISIBLE);

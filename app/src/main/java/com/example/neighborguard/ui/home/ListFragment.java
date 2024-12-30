@@ -16,6 +16,7 @@ import com.example.neighborguard.api.ApiController;
 import com.example.neighborguard.api.UserApi;
 import com.example.neighborguard.databinding.FragmentListBinding;
 import com.example.neighborguard.interfaces.Callback_recipient;
+import com.example.neighborguard.model.CurrentUserManager;
 import com.example.neighborguard.model.ExtendedUser;
 import com.example.neighborguard.model.SearchUsersResponseSchema;
 
@@ -81,14 +82,51 @@ public class ListFragment extends Fragment {
         //binding.listBTNSend.setOnClickListener(v -> itemClicked(32.1212, 34.1212));
     }
 
-    private void fetchRecipients() {
-        Call<SearchUsersResponseSchema> call = userApi.findUser(
-                null,           // email
-                true,          // toExtendMeeting
-                "RECIPIENT",   // role - get only recipients
-                null,          // filterByLat
-                null,          // filterByLon
-                true          // isRequiredAssistance - get recipients who need help
+//    private void fetchRecipients() {
+//        Call<SearchUsersResponseSchema> call = userApi.getUsers(
+//                null,           // email
+//                true,          // toExtendMeeting
+//                "RECIPIENT",   // role - get only recipients
+//                null,          // filterByLat
+//                null,          // filterByLon
+//                true          // isRequiredAssistance - get recipients who need help
+//        );
+//
+//        call.enqueue(new Callback<SearchUsersResponseSchema>() {
+//            @Override
+//            public void onResponse(Call<SearchUsersResponseSchema> call, Response<SearchUsersResponseSchema> response) {
+//                if (response.isSuccessful() && response.body() != null) {
+//                    recipients.clear();
+//                    ArrayList<ExtendedUser> users = response.body().getUsers();
+//                    if (users != null) {
+//                        recipients.addAll(users);
+//                        recipientAdapter.notifyDataSetChanged();
+//                    } else {
+//                        Toast.makeText(getContext(), "No recipients found", Toast.LENGTH_SHORT).show();
+//                    }
+//                } else {
+//                    Toast.makeText(getContext(), "Failed to load recipients", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<SearchUsersResponseSchema> call, Throwable t) {
+//                Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//    }
+
+    private void fetchRecipients() { // new 25/12
+        // Get the current volunteer's UID from your user manager
+        String volunteerUID = CurrentUserManager.getInstance().getUser().getUid();
+        Double volunteerLat = CurrentUserManager.getInstance().getUser().getLonLat().getLatitude();
+        Double volunteerLon = CurrentUserManager.getInstance().getUser().getLonLat().getLongitude();
+
+        Call<SearchUsersResponseSchema> call = userApi.getNearbyRecipients(
+                volunteerUID,     // current volunteer's UID
+                true,            // toExtendMeeting
+                volunteerLat,            // filterByLat (or actual location if needed)
+                volunteerLon             // filterByLon (or actual location if needed)
         );
 
         call.enqueue(new Callback<SearchUsersResponseSchema>() {
@@ -97,11 +135,11 @@ public class ListFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     recipients.clear();
                     ArrayList<ExtendedUser> users = response.body().getUsers();
-                    if (users != null) {
+                    if (users != null && !users.isEmpty()) {
                         recipients.addAll(users);
                         recipientAdapter.notifyDataSetChanged();
                     } else {
-                        Toast.makeText(getContext(), "No recipients found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "No recipients need assistance nearby", Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Toast.makeText(getContext(), "Failed to load recipients", Toast.LENGTH_SHORT).show();
