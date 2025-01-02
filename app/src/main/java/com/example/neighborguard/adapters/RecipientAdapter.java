@@ -1,5 +1,6 @@
 package com.example.neighborguard.adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -12,35 +13,46 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.neighborguard.R;
+import com.example.neighborguard.api.ApiController;
+import com.example.neighborguard.api.MeetingApi;
+import com.example.neighborguard.enums.MeetingStatusEnum;
 import com.example.neighborguard.interfaces.Callback_recipient;
 import com.example.neighborguard.model.CurrentUserManager;
-import com.example.neighborguard.model.ExtendedUser;
+import com.example.neighborguard.model.Meeting;
+import com.example.neighborguard.model.NewMeeting;
+import com.example.neighborguard.model.User;
 import com.example.neighborguard.model.LonLat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Base64;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.RecipientViewHolder> {
 
     private Context context;
     private Callback_recipient callbackRecipient;
-    private ArrayList<ExtendedUser> recipients;
+    private ArrayList<User> recipients;
     private CurrentUserManager currentUserManager;
     private SparseBooleanArray expandedItems = new SparseBooleanArray();
+    private MeetingApi meetingApi;
 
 
-    public RecipientAdapter(Context context, ArrayList<ExtendedUser> recipients) {
+
+    public RecipientAdapter(Context context, ArrayList<User> recipients) {
         this.context = context;
         this.recipients = recipients;
         this.currentUserManager = CurrentUserManager.getInstance();
+        this.meetingApi = ApiController.getRetrofitInstance().create(MeetingApi.class);
     }
 
     public void setCallbackRecipient(Callback_recipient callbackRecipient) {
@@ -56,7 +68,7 @@ public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.Reci
 
     @Override
     public void onBindViewHolder(@NonNull RecipientAdapter.RecipientViewHolder holder, int position) {
-        ExtendedUser recipient = recipients.get(position);
+        User recipient = recipients.get(position);
         boolean isExpanded = expandedItems.get(position, false);
 
         setExpandableContent(holder, isExpanded);
@@ -131,7 +143,7 @@ public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.Reci
     }
 
 
-    private String getServicesText(ExtendedUser recipient) {
+    private String getServicesText(User recipient) {
         // Check if services list exists and is not empty
         if (recipient.getServices() == null || recipient.getServices().isEmpty()) {
             return "Services: none";
@@ -144,9 +156,9 @@ public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.Reci
     }
 
 
-    private String getDistanceText(ExtendedUser recipient) {
+    private String getDistanceText(User recipient) {
         // Check if current user and recipient have valid location data
-        ExtendedUser currentUser = currentUserManager.getUser();
+        User currentUser = currentUserManager.getUser();
         if (currentUser == null || currentUser.getLonLat() == null
                 || recipient == null || recipient.getLonLat() == null) {
             return "Distance: N/A";
@@ -249,12 +261,14 @@ public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.Reci
         return recipients == null ? 0 : recipients.size();
     }
 
-    public ExtendedUser getRecipient(int position) {
+
+    public User getRecipient(int position) {
         return recipients.get(position);
     }
 
 
     public class RecipientViewHolder extends RecyclerView.ViewHolder {
+        // UI Components
         private ShapeableImageView recipient_IMG_image;
         private MaterialTextView recipient_LBL_name;
         private MaterialTextView recipient_LBL_phone;
@@ -267,42 +281,157 @@ public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.Reci
         private MaterialButton recipient_BTN_cancel;
 
         private LinearLayout expandableContent;
-        private CardView recipient_CARD_image;  // Add this line
+        private CardView recipient_CARD_image;
         private CardView recipient_CARD_data;
         private RelativeLayout dataRelativeLayout;
 
-
+        // State tracking variables
+        private boolean isPickedByCurrentVolunteer = false;
+        private String meetingID;  // We still need this for API calls
 
         public RecipientViewHolder(@NonNull View itemView) {
             super(itemView);
+            initViews(itemView);
+            setupButtonListeners();
+        }
+
+        private void initViews(View itemView) {
+            // Initialize all view references
             expandableContent = itemView.findViewById(R.id.expandableContent);
             recipient_CARD_image = itemView.findViewById(R.id.recipient_CARD_image);
             recipient_CARD_data = itemView.findViewById(R.id.recipient_CARD_data);
             dataRelativeLayout = recipient_CARD_data.findViewById(R.id.data_relative_layout);
 
-
             recipient_IMG_image = itemView.findViewById(R.id.recipient_IMG_image);
-             recipient_LBL_name = itemView.findViewById(R.id.recipient_LBL_name);
-             recipient_LBL_phone = itemView.findViewById(R.id.recipient_LBL_phone);
-             recipient_LBL_address = itemView.findViewById(R.id.recipient_LBL_address);
-             recipient_LBL_distance = itemView.findViewById(R.id.recipient_LBL_distance);
-             recipient_LBL_lastOk = itemView.findViewById(R.id.recipient_LBL_lastOk);
-             recipient_LBL_service = itemView.findViewById(R.id.recipient_LBL_service);
-             recipient_IMG_check = itemView.findViewById(R.id.recipient_IMG_check);
+            recipient_LBL_name = itemView.findViewById(R.id.recipient_LBL_name);
+            recipient_LBL_phone = itemView.findViewById(R.id.recipient_LBL_phone);
+            recipient_LBL_address = itemView.findViewById(R.id.recipient_LBL_address);
+            recipient_LBL_distance = itemView.findViewById(R.id.recipient_LBL_distance);
+            recipient_LBL_lastOk = itemView.findViewById(R.id.recipient_LBL_lastOk);
+            recipient_LBL_service = itemView.findViewById(R.id.recipient_LBL_service);
+            recipient_IMG_check = itemView.findViewById(R.id.recipient_IMG_check);
+            recipient_BTN_pick = itemView.findViewById(R.id.recipient_BTN_pick);
+            recipient_BTN_pick.setVisibility(View.VISIBLE);
+            recipient_BTN_cancel = itemView.findViewById(R.id.recipient_BTN_cancel);
+            recipient_BTN_cancel.setVisibility(View.GONE);
+        }
 
-             recipient_BTN_pick = itemView.findViewById(R.id.recipient_BTN_pick);
-             recipient_BTN_pick.setOnClickListener(v ->{
-                 if (callbackRecipient != null) {
-                     callbackRecipient.recipientPicked(getRecipient(getAdapterPosition()), getAdapterPosition());
-                 }
-             });
-
-             recipient_BTN_cancel = itemView.findViewById(R.id.recipient_BTN_cancel);
-             recipient_BTN_cancel.setOnClickListener(v -> {
-                if (callbackRecipient != null) {
-                    callbackRecipient.recipientCanceled(getRecipient(getAdapterPosition()), getAdapterPosition());
+        private void setupButtonListeners() {
+            // Handle pick button clicks
+            recipient_BTN_pick.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    if (!isPickedByCurrentVolunteer) {
+                        pickButtonClicked(position);
+                    } else {
+                        Toast.makeText(context, "You have already picked this recipient", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
+
+            // Handle cancel button clicks with parallel logic
+            recipient_BTN_cancel.setOnClickListener(v -> {
+                if (isPickedByCurrentVolunteer) {
+                    cancelButtonClicked();
+                } else {
+                    Toast.makeText(context, "You haven't picked this recipient yet", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        private void pickButtonClicked(int position) {
+            User recipient = recipients.get(position);
+            User volunteer = currentUserManager.getUser();
+
+            // Create the meeting request
+            NewMeeting newMeeting = new NewMeeting();
+            newMeeting.setRecipient(recipient);
+            newMeeting.setVolunteer(volunteer);
+            newMeeting.setDate(System.currentTimeMillis() / 1000L);
+            newMeeting.setStatus(MeetingStatusEnum.IS_PICKED);
+
+            // Make the API call
+            meetingApi.createMeeting(newMeeting).enqueue(new Callback<Meeting>() {
+                @Override
+                public void onResponse(Call<Meeting> call, Response<Meeting> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        // Store meeting ID and update state
+                        meetingID = response.body().getUid();
+                        Toast.makeText(context, "Meeting created successfully!", Toast.LENGTH_SHORT).show();
+
+                        // Update UI on main thread
+                        recipient_IMG_check.post(() -> {
+                            recipient_IMG_check.setImageResource(R.drawable.ic_green_check);
+                            isPickedByCurrentVolunteer = true;
+                            updateButtonsVisibility();
+                        });
+                    } else {
+                        if (response.code() == 409) {
+                            Toast.makeText(context, "This recipient has already been picked by another volunteer", Toast.LENGTH_LONG).show();
+                            // Remove from list if picked by another volunteer
+                            recipients.remove(position);
+                            notifyItemRemoved(position);
+                            notifyItemRangeChanged(position, recipients.size());
+                        } else {
+                            Toast.makeText(context, "Failed to create meeting", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Meeting> call, Throwable t) {
+                    Toast.makeText(context, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        private void cancelButtonClicked() {
+            // Show confirmation dialog before cancelling
+            new AlertDialog.Builder(context)
+                    .setTitle("Cancel Meeting")
+                    .setMessage("Are you sure you want to cancel this meeting?")
+                    .setPositiveButton("Yes", (dialog, which) -> performCancellation())
+                    .setNegativeButton("No", null)
+                    .show();
+        }
+
+        private void performCancellation() {
+            meetingApi.cancelMeeting(meetingID).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(context, "Meeting cancelled successfully", Toast.LENGTH_SHORT).show();
+
+                        // Reset state on main thread
+                        recipient_IMG_check.post(() -> {
+                            resetState();
+                        });
+                    } else {
+                        Toast.makeText(context, "Failed to cancel meeting", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(context, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        private void resetState() {
+            // Reset all state variables
+            isPickedByCurrentVolunteer = false;
+            meetingID = null;
+
+            // Reset UI elements
+            recipient_IMG_check.setImageResource(R.drawable.ic_black_check);
+            updateButtonsVisibility();
+        }
+
+        private void updateButtonsVisibility() {
+            // Update buttons based on picked state
+            recipient_BTN_pick.setVisibility(isPickedByCurrentVolunteer ? View.GONE : View.VISIBLE);
+            recipient_BTN_cancel.setVisibility(isPickedByCurrentVolunteer ? View.VISIBLE : View.GONE);
         }
     }
 }

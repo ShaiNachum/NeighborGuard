@@ -1,6 +1,6 @@
 package com.example.neighborguard.model;
 
-import java.util.ArrayList;
+
 
 public class User extends NewUser {
     private String uid;

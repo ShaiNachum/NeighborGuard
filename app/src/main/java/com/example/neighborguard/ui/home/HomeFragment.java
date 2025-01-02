@@ -16,10 +16,12 @@ import com.example.neighborguard.api.UserApi;
 import com.example.neighborguard.databinding.FragmentHomeBinding;
 import com.example.neighborguard.interfaces.Callback_recipient;
 import com.example.neighborguard.model.CurrentUserManager;
-import com.example.neighborguard.model.ExtendedUser;
 import com.example.neighborguard.model.User;
 import com.example.neighborguard.enums.UserAssistanceStatusEnum;
 import com.example.neighborguard.enums.UserRoleEnum;
+import com.example.neighborguard.utils.DialogUtils;
+
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,6 +34,13 @@ public class HomeFragment extends Fragment {
     private CurrentUserManager currentUserManager;
 
     private ListFragment listFragment;
+
+    private ArrayList<String> services;
+    private String[] servicesArray;
+    private boolean[] selectedServices;
+    private ArrayList<Integer> servicesList;
+    private ArrayList<String> selectedServicesList;
+
     private MapFragment mapFragment;
 
 
@@ -69,16 +78,6 @@ public class HomeFragment extends Fragment {
                 public void recipientClicked(double lat, double lng) {
                     mapFragment.zoop(lat,lng);
                 }
-
-                @Override
-                public void recipientPicked(ExtendedUser extendedUser, int position) {
-
-                }
-
-                @Override
-                public void recipientCanceled(ExtendedUser extendedUser, int position) {
-
-                }
             });
 
 
@@ -87,7 +86,7 @@ public class HomeFragment extends Fragment {
             //map:
             mapFragment = new MapFragment();
             getParentFragmentManager().beginTransaction()
-                    .add(binding.homeRecipientFRAMEMap.getId(), mapFragment)
+                    .add(binding.homeVolunteerFRAMEMap.getId(), mapFragment)
                     .commit();
 
 
@@ -96,65 +95,119 @@ public class HomeFragment extends Fragment {
         }
         else {//is Recipient
             binding.homeRecipientBTNIAmOk.setOnClickListener(View -> iAmOkClicked());
+
+            binding.homeRecipientBTNPost.setOnClickListener(View -> postClicked());
+            initServices();
         }
     }
 
+    private void initServices() {
+        services = new ArrayList<>();
+        services.add("Handyman");
+        services.add("Dog Walker");
+        services.add("Groceries Shopping");
 
-    private void iAmOkClicked() {
-        User user = currentUserManager.getUserFromExtendedUser();
+        servicesArray = services.toArray(new String[0]);
+        selectedServices = new boolean[servicesArray.length];
+        servicesList = new ArrayList<>();
+        selectedServicesList = new ArrayList<>();
 
-        // Set the current time in seconds since epoch
-        user.setLastOK(System.currentTimeMillis() / 1000L);
+        binding.homeRecipientLBLSelectServices.setOnClickListener(v ->
+                DialogUtils.showMultiChoiceDialog(
+                        getContext(),
+                        "Select Services",
+                        servicesArray,
+                        selectedServices,
+                        servicesList,
+                        selectedServicesList,
+                        binding.homeRecipientLBLSelectServices,
+                        "Select Services"
+                )
+        );
+    }
 
-        // Set the assistance status to DO_NOT_NEED_ASSISTANCE
-        user.setAssistanceStatus(UserAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE);
+    private void updateUserInBackend(User user, View progressBar, String successMessage) {
+        // Show progress bar
+        progressBar.setVisibility(View.VISIBLE);
 
-        // Show progress bar while updating
-        binding.homePBProgressBar.setVisibility(View.VISIBLE);
-
-        // Make API call
         Call<Void> call = userApi.updateUser(user.getUid(), user);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 // Hide progress bar
-                binding.homePBProgressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
 
                 if (response.isSuccessful()) {
-                    // Update was successful
-                    Toast.makeText(getActivity(), "I am OK - Updated", Toast.LENGTH_SHORT).show();
-
-                    // Update the current user in CurrentUserManager
-                    currentUserManager.setExtendedUserFromUser(user);
+                    Toast.makeText(getActivity(), successMessage, Toast.LENGTH_SHORT).show();
+                    currentUserManager.setUser(user);
                 } else {
-                    // Handle error response
-                    Toast.makeText(getActivity(), "Failed to update I am OK status", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Failed to update user", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                // Hide progress bar
-                binding.homePBProgressBar.setVisibility(View.GONE);
-
-                // Handle network/other errors
+                progressBar.setVisibility(View.GONE);
                 Toast.makeText(getActivity(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("Retrofit", "Network error or failure: " + t.getMessage());
             }
         });
     }
 
+    private void postClicked() {
+        User user = currentUserManager.getUser();
+
+        user.setServices(selectedServicesList);
+
+        if (selectedServicesList.isEmpty() && user.getAssistanceStatus() == UserAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE) {
+            user.setAssistanceStatus(UserAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE);
+        } else {
+            user.setAssistanceStatus(UserAssistanceStatusEnum.NEED_ASSISTANCE);
+        }
+
+        updateUserInBackend(user, binding.homeRecipientPBProgressBar, selectedServicesList.isEmpty() ? "Services cleared successfully" : "Services updated successfully");
+    }
+
+
+    private void iAmOkClicked() {
+        User user = currentUserManager.getUser();
+
+        // Set the current time in seconds since epoch
+        user.setLastOK(System.currentTimeMillis() / 1000L);
+
+        // Only set DO_NOT_NEED_ASSISTANCE if there are no active services
+        if (user.getServices().isEmpty()) {
+            user.setAssistanceStatus(UserAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE);
+        }
+
+        updateUserInBackend(user, binding.homePBProgressBar, "I am OK - Updated");
+    }
+
 
     private void setUserUIByRole(UserRoleEnum role) {
         if(role == UserRoleEnum.VOLUNTEER){
+            binding.homeRecipientFLUpperPart.setVisibility(View.GONE);
             binding.homeRecipientBTNIAmOk.setVisibility(View.GONE);
+            binding.homeRecipientLBLNextMeetings.setVisibility(View.GONE);
+            binding.homeRecipientFRAMENextMeetingsList.setVisibility(View.GONE);
+            binding.homeRecipientLLServices.setVisibility(View.GONE);
+            binding.homeRecipientBTNPost.setVisibility(View.GONE);
             binding.homeVolunteerFRAMEList.setVisibility(View.VISIBLE);
-            binding.homeRecipientFRAMEMap.setVisibility(View.VISIBLE);
+            binding.homeVolunteerFRAMEMap.setVisibility(View.VISIBLE);
         }
         else{//is Recipient
+            binding.homeRecipientFLUpperPart.setVisibility(View.VISIBLE);
             binding.homeRecipientBTNIAmOk.setVisibility(View.VISIBLE);
+            binding.homeRecipientLBLNextMeetings.setVisibility(View.VISIBLE);
+            binding.homeRecipientFRAMENextMeetingsList.setVisibility(View.VISIBLE);
+            binding.homeRecipientLLServices.setVisibility(View.VISIBLE);
+            if(currentUserManager.getUser().getServices().isEmpty())
+                binding.homeRecipientLBLSelectServices.setText("Select Services");
+            else
+                binding.homeRecipientLBLSelectServices.setText(String.valueOf(currentUserManager.getUser().getServices()));
+            binding.homeRecipientBTNPost.setVisibility(View.VISIBLE);
             binding.homeVolunteerFRAMEList.setVisibility(View.GONE);
-            binding.homeRecipientFRAMEMap.setVisibility(View.GONE);
+            binding.homeVolunteerFRAMEMap.setVisibility(View.GONE);
         }
     }
 

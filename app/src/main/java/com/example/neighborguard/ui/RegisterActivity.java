@@ -458,11 +458,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         if(role == UserRoleEnum.RECIPIENT){
             //less then 1 KM
-            //lonLat.setLatitude(32.114059);
-            //lonLat.setLongitude(34.798969);
+            lonLat.setLatitude(32.114059);
+            lonLat.setLongitude(34.798969);
             //more then 1 KM
-            lonLat.setLatitude(34.886812);
-            lonLat.setLongitude(32.15549);
+            //lonLat.setLatitude(34.886812);
+            //lonLat.setLongitude(32.15549);
         }
         else{
             lonLat.setLatitude(32.119885);

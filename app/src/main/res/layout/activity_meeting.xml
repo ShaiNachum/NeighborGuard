@@ -1,28 +1,438 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Root layout container with vertical orientation to stack the two main sections -->
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    tools:context=".ui.MeetingActivity">
+    android:orientation="vertical"
+    tools:context=".ui.MeetingActivity"
+    android:gravity="center"
+    android:paddingHorizontal="14dp"
+    android:weightSum="2"
+    >
+
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Picked at: "
+        android:textSize="25sp"
+        android:textStyle="bold|italic"
+        android:gravity="center"
+        />
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:gravity="center"
         >
 
+        <!-- Recipient Title - Now positioned above both data and image -->
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/meeting_LBL_recipientTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="The Recipient"
+            android:textSize="22sp"
+            android:textStyle="bold|italic"
+            android:gravity="start"
+            />
+
+        <!-- Horizontal container for recipient data and image -->
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/meeting_LL_recipient"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:weightSum="4"
+            >
+
+            <!-- Recipient Data Container - Takes 75% of width -->
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/meeting_LBL_recipientData"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_weight="3"
+                >
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="left">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_recipientName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Name: "
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:gravity="start"
+                        />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_recipientTheName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:maxLines="2"
+                        android:gravity="start"
+                        />
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
 
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/meeting_LBL_recipientPhone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Phone:"
+                    android:textSize="18sp"
+                    android:textStyle="bold|italic"
+                    android:gravity="start"
+                    />
 
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal"
+                    android:layout_gravity="left">
 
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_recipientAddress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Address: "
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:gravity="start"
+                        />
 
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_recipientTheAddress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:maxLines="2"
+                        android:gravity="start"
+                        />
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/meeting_LBL_recipientAge"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Age: "
+                    android:textSize="18sp"
+                    android:textStyle="bold|italic"
+                    android:gravity="start"
+                    />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/meeting_LBL_recipientGender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Gender:"
+                    android:textSize="18sp"
+                    android:textStyle="bold|italic"
+                    android:gravity="start"
+                    />
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal"
+                    android:layout_gravity="left">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_recipientLanguages"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Languages: "
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:gravity="start"
+                        />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_recipientTheLanguages"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:maxLines="3"
+                        android:gravity="start"
+                        />
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/meeting_LBL_recipientLastOk"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Last ok:"
+                    android:textSize="18sp"
+                    android:textStyle="bold|italic"
+                    android:gravity="start"
+                    />
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal"
+                    android:layout_gravity="left">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_recipientServices"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Service Needed:"
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:gravity="start"
+                        />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_recipientTheServices"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:maxLines="2"
+                        android:gravity="start"
+                        />
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <!-- Recipient Image Container - Takes 25% of width -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/meeting_CV_recipientImage"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                >
+
+                <ImageView
+                    android:id="@+id/meeting_IV_recipientImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_gravity="top"
+                    android:src="@drawable/ic_profile_image_24"
+                    android:scaleType="centerCrop"
+                    android:adjustViewBounds="true"
+                    />
+            </androidx.cardview.widget.CardView>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
-</ScrollView>
+
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        >
+
+        <!-- Recipient Title - Now positioned above both data and image -->
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/meeting_LBL_volunteerTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="The Volunteer"
+            android:textSize="22sp"
+            android:textStyle="bold|italic"
+            android:gravity="start"
+            />
+
+        <!-- Horizontal container for recipient data and image -->
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/meeting_LL_volunteer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:weightSum="4"
+            >
+
+            <!-- Recipient Data Container - Takes 75% of width -->
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/meeting_LBL_volunteerData"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_weight="3"
+                >
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_gravity="left">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_volunteerName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Name: "
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:gravity="start"
+                        />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_volunteerTheName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:maxLines="2"
+                        android:gravity="start"
+                        />
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/meeting_LBL_volunteerPhone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Phone:"
+                    android:textSize="18sp"
+                    android:textStyle="bold|italic"
+                    android:gravity="start"
+                    />
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal"
+                    android:layout_gravity="left">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_volunteerAddress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Address: "
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:gravity="start"
+                        />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_volunteerTheAddress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:maxLines="2"
+                        android:gravity="start"
+                        />
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/meeting_LBL_volunteerAge"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Age: "
+                    android:textSize="18sp"
+                    android:textStyle="bold|italic"
+                    android:gravity="start"
+                    />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/meeting_LBL_volunteerGender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Gender:"
+                    android:textSize="18sp"
+                    android:textStyle="bold|italic"
+                    android:gravity="start"
+                    />
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal"
+                    android:layout_gravity="left">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_volunteerLanguages"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Languages: "
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:gravity="start"
+                        />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/meeting_LBL_volunteerTheLanguages"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="18sp"
+                        android:textStyle="bold|italic"
+                        android:maxLines="3"
+                        android:gravity="start"
+                        />
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <!-- Recipient Image Container - Takes 25% of width -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/meeting_CV_volunteerImage"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                >
+
+                <ImageView
+                    android:id="@+id/meeting_IV_volunteerImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_gravity="top"
+                    android:src="@drawable/ic_profile_image_24"
+                    android:scaleType="centerCrop"
+                    android:adjustViewBounds="true"
+                    />
+            </androidx.cardview.widget.CardView>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</androidx.appcompat.widget.LinearLayoutCompat>

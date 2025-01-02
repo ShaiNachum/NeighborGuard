@@ -17,14 +17,13 @@ import com.example.neighborguard.api.UserApi;
 import com.example.neighborguard.databinding.FragmentListBinding;
 import com.example.neighborguard.interfaces.Callback_recipient;
 import com.example.neighborguard.model.CurrentUserManager;
-import com.example.neighborguard.model.ExtendedUser;
+import com.example.neighborguard.model.User;
 import com.example.neighborguard.model.SearchUsersResponseSchema;
 
 import android.widget.Toast;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
 import java.util.ArrayList;
 
 
@@ -33,7 +32,7 @@ public class ListFragment extends Fragment {
     private Callback_recipient callbackRecipient;
     private RecipientAdapter recipientAdapter;
     private UserApi userApi;
-    private ArrayList<ExtendedUser> recipients = new ArrayList<>();
+    private ArrayList<User> recipients = new ArrayList<>();
 
 
     @Override
@@ -52,7 +51,7 @@ public class ListFragment extends Fragment {
     }
 
     private void initViews() {
-// Initialize RecyclerView with vertical layout
+        // Initialize RecyclerView with vertical layout
         recipientAdapter = new RecipientAdapter(getContext(), recipients);
         binding.listLSTRecipients.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.listLSTRecipients.setAdapter(recipientAdapter);
@@ -65,68 +64,20 @@ public class ListFragment extends Fragment {
                     callbackRecipient.recipientClicked(lat, lng);
                 }
             }
-
-            @Override
-            public void recipientPicked(ExtendedUser extendedUser, int position) {
-                // Handle when a recipient is picked
-                // You can implement your logic here
-            }
-
-            @Override
-            public void recipientCanceled(ExtendedUser extendedUser, int position) {
-                // Handle when a recipient is canceled
-                // You can implement your logic here
-            }
         });
 
         //binding.listBTNSend.setOnClickListener(v -> itemClicked(32.1212, 34.1212));
     }
 
-//    private void fetchRecipients() {
-//        Call<SearchUsersResponseSchema> call = userApi.getUsers(
-//                null,           // email
-//                true,          // toExtendMeeting
-//                "RECIPIENT",   // role - get only recipients
-//                null,          // filterByLat
-//                null,          // filterByLon
-//                true          // isRequiredAssistance - get recipients who need help
-//        );
-//
-//        call.enqueue(new Callback<SearchUsersResponseSchema>() {
-//            @Override
-//            public void onResponse(Call<SearchUsersResponseSchema> call, Response<SearchUsersResponseSchema> response) {
-//                if (response.isSuccessful() && response.body() != null) {
-//                    recipients.clear();
-//                    ArrayList<ExtendedUser> users = response.body().getUsers();
-//                    if (users != null) {
-//                        recipients.addAll(users);
-//                        recipientAdapter.notifyDataSetChanged();
-//                    } else {
-//                        Toast.makeText(getContext(), "No recipients found", Toast.LENGTH_SHORT).show();
-//                    }
-//                } else {
-//                    Toast.makeText(getContext(), "Failed to load recipients", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<SearchUsersResponseSchema> call, Throwable t) {
-//                Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//    }
-
-    private void fetchRecipients() { // new 25/12
-        // Get the current volunteer's UID from your user manager
+    private void fetchRecipients() {
         String volunteerUID = CurrentUserManager.getInstance().getUser().getUid();
         Double volunteerLat = CurrentUserManager.getInstance().getUser().getLonLat().getLatitude();
         Double volunteerLon = CurrentUserManager.getInstance().getUser().getLonLat().getLongitude();
 
         Call<SearchUsersResponseSchema> call = userApi.getNearbyRecipients(
                 volunteerUID,     // current volunteer's UID
-                true,            // toExtendMeeting
-                volunteerLat,            // filterByLat (or actual location if needed)
-                volunteerLon             // filterByLon (or actual location if needed)
+                volunteerLat,    // filterByLat
+                volunteerLon     // filterByLon
         );
 
         call.enqueue(new Callback<SearchUsersResponseSchema>() {
@@ -134,7 +85,7 @@ public class ListFragment extends Fragment {
             public void onResponse(Call<SearchUsersResponseSchema> call, Response<SearchUsersResponseSchema> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     recipients.clear();
-                    ArrayList<ExtendedUser> users = response.body().getUsers();
+                    ArrayList<User> users = response.body().getUsers();  // Changed from ExtendedUser
                     if (users != null && !users.isEmpty()) {
                         recipients.addAll(users);
                         recipientAdapter.notifyDataSetChanged();

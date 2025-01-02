@@ -1,6 +1,5 @@
 package com.example.neighborguard.api;
 
-import com.example.neighborguard.model.ExtendedUser;
 import com.example.neighborguard.model.NewUser;
 import com.example.neighborguard.model.SearchUsersResponseSchema;
 import com.example.neighborguard.model.User;
@@ -15,22 +14,19 @@ import retrofit2.http.Query;
 
 
 
-
 public interface UserApi {
     @GET("/users")
     Call<SearchUsersResponseSchema> getUsers(
             @Query("email") String email,
-            @Query("toExtendMeeting") boolean toExtendMeeting,
             @Query("role") String role,
             @Query("filterByLat") Double filterByLat,
             @Query("filterByLon") Double filterByLon,
             @Query("isRequiredAssistance") boolean isRequiredAssistance
     );
 
-    @GET("/users/recipients")  // new 25/12 endpoint for getting nearby recipients
+    @GET("/users/recipients")
     Call<SearchUsersResponseSchema> getNearbyRecipients(
             @Query("volunteerUID") String volunteerUID,
-            @Query("toExtendMeeting") boolean toExtendMeeting,
             @Query("filterByLat") Double filterByLat,
             @Query("filterByLon") Double filterByLon
     );
@@ -38,10 +34,9 @@ public interface UserApi {
     @POST("/user")
     Call<User> createUser(@Body NewUser newUser);
 
-    @GET("/user/{email}")  // new 25/12 endpoint for getting user by email
-    Call<ExtendedUser> getUserByEmail(
-            @Path("email") String email,
-            @Query("toExtendMeeting") boolean toExtendMeeting
+    @GET("/user/{email}")
+    Call<User> getUserByEmail(
+            @Path("email") String email
     );
 
     @PUT("user/{uid}")

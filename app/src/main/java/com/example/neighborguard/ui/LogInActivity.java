@@ -15,8 +15,7 @@ import com.example.neighborguard.api.ApiController;
 import com.example.neighborguard.api.UserApi;
 import com.example.neighborguard.databinding.ActivityLogInBinding;
 import com.example.neighborguard.model.CurrentUserManager;
-import com.example.neighborguard.model.ExtendedUser;
-import com.example.neighborguard.model.SearchUsersResponseSchema;
+import com.example.neighborguard.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -127,51 +126,14 @@ public class LogInActivity extends AppCompatActivity {
     }
 
 
-//    private void getUserByEmail(String email){
-//        //Call<SearchUsersResponseSchema> call = apiService.findUser(email, true);
-//        Call<SearchUsersResponseSchema> call = apiService.findUser(
-//                email,              // email to find specific user
-//                true,              // toExtendMeeting - to get user's meetings
-//                null,              // role - not filtering by role during login
-//                null,              // filterByLat - no location filtering during login
-//                null,              // filterByLon - no location filtering during login
-//                false              // isRequiredAssistance - not checking for assistance during login
-//        );
-//
-//        call.enqueue(new Callback<SearchUsersResponseSchema>() {
-//            @Override
-//            public void onResponse(Call<SearchUsersResponseSchema> call, Response<SearchUsersResponseSchema> response) {
-//                SearchUsersResponseSchema responseBody = response.body();
-//                if (responseBody == null) {
-//                    throw new IllegalArgumentException("null response body");
-//                }
-//                ExtendedUser user = responseBody.getFirstExtendedUser();
-//
-//                if (response.isSuccessful()  && user != null) {
-//                    Toast.makeText(LogInActivity.this, "Hello " + user.getEmail(), Toast.LENGTH_LONG).show();
-//                    switchToMainActivity(user);
-//                } else {
-//                    //Log.e("Retrofit", "Failed to retrieve user. Error code: " + response.code());
-//                    Toast.makeText(LogInActivity.this, "Failed to log in ", Toast.LENGTH_LONG).show();
-//                }
-//            }
-//            @Override
-//            public void onFailure(Call<SearchUsersResponseSchema> call, Throwable t) {
-//                Log.e("Retrofit", "Network error or failure: " + t.getMessage());
-//                Toast.makeText(LogInActivity.this, "SHIT HAPPENS ;)", Toast.LENGTH_LONG).show();
-//            }
-//        });
-//    }
-
-    // new 25/12
     private void getUserByEmail(String email) {
-        Call<ExtendedUser> call = apiService.getUserByEmail(email, true);
+        Call<User> call = apiService.getUserByEmail(email);
 
-        call.enqueue(new Callback<ExtendedUser>() {
+        call.enqueue(new Callback<User>() {
             @Override
-            public void onResponse(Call<ExtendedUser> call, Response<ExtendedUser> response) {
+            public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ExtendedUser user = response.body();
+                    User user = response.body();
                     Toast.makeText(LogInActivity.this, "Hello " + user.getEmail(), Toast.LENGTH_LONG).show();
                     switchToMainActivity(user);
                 } else {
@@ -180,7 +142,7 @@ public class LogInActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<ExtendedUser> call, Throwable t) {
+            public void onFailure(Call<User> call, Throwable t) {
                 Log.e("Retrofit", "Network error or failure: " + t.getMessage());
                 Toast.makeText(LogInActivity.this, "SHIT HAPPENS ;)", Toast.LENGTH_LONG).show();
             }
@@ -188,10 +150,10 @@ public class LogInActivity extends AppCompatActivity {
     }
 
 
-    private void switchToMainActivity(ExtendedUser user) {
+    private void switchToMainActivity(User user) {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         CurrentUserManager manager = CurrentUserManager.getInstance();
-        manager.setExtendedUserFromExtendedUser(user);
+        manager.setUser(user);
         startActivity(intent);
         this.finish();
     }

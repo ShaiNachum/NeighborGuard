@@ -170,30 +170,6 @@ public class SettingsFragment extends Fragment{
         if(getActivity() == null) return;
 
         if(resultCode == Activity.RESULT_OK && data != null) {
-//            if(requestCode == CAM_REQ) {
-//                try {
-//                    Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-//                    if(bitmap != null) {
-//                        binding.settingIMGProfile.setImageBitmap(bitmap);
-//                        base64ProfileImage = convertBitmapToBase64(bitmap);
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                    Toast.makeText(getActivity(), "Failed to capture image", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//            else if(requestCode == IMG_REQ) {
-//                try {
-//                    Uri imageUri = data.getData();
-//                    if(imageUri != null) {
-//                        binding.settingIMGProfile.setImageURI(imageUri);
-//                        base64ProfileImage = convertUriToBase64(imageUri);
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                    Toast.makeText(getActivity(), "Failed to load image", Toast.LENGTH_SHORT).show();
-//                }
-//            }
             if(requestCode == CAM_REQ) {
                 try {
                     Bitmap bitmap = (Bitmap) data.getExtras().get("data");
@@ -271,12 +247,7 @@ public class SettingsFragment extends Fragment{
 
     private void initHintsFromCurrentUser() {
         base64ProfileImage = currentUserManager.getUser().getProfileImage();
-//        if (base64ProfileImage != null && !base64ProfileImage.isEmpty()) {
-//            Bitmap bitmap = base64ToBitmap(base64ProfileImage);
-//            if (bitmap != null) {
-//                binding.settingIMGProfile.setImageBitmap(bitmap);
-//            }
-//        }
+
         if (base64ProfileImage != null && !base64ProfileImage.isEmpty()) {
             Glide.with(requireContext())
                     .load(Base64.decode(base64ProfileImage, Base64.DEFAULT))
@@ -304,17 +275,6 @@ public class SettingsFragment extends Fragment{
         binding.settingsEDTStreet.setText(currentUserManager.getUser().getAddress().getStreet());
         binding.settingsEDTHouseNumber.setText(String.valueOf(currentUserManager.getUser().getAddress().getHouseNumber()));
         binding.settingsEDTApartmentNumber.setText(String.valueOf(currentUserManager.getUser().getAddress().getApartmentNumber()));
-    }
-
-
-    private Bitmap base64ToBitmap(String base64Image) {
-        try {
-            byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
-            return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
 
@@ -376,7 +336,7 @@ public class SettingsFragment extends Fragment{
 
 
     private void saveClicked() {
-        user = currentUserManager.getUserFromExtendedUser();
+        user = currentUserManager.getUser();
         address = user.getAddress();
         lonLat = new LonLat();
         boolean isAddressChanged = false;
@@ -487,7 +447,7 @@ public class SettingsFragment extends Fragment{
         // Show progress bar while updating
         binding.settingsPBProgressBar.setVisibility(View.VISIBLE);
 
-        // Use the ExtendedUser's uid directly
+        // Use the User's uid directly.
         String uid = user.getUid();
         int i = 0;
 
@@ -504,7 +464,7 @@ public class SettingsFragment extends Fragment{
                     Toast.makeText(getActivity(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
 
                     // Update the current user in CurrentUserManager
-                    currentUserManager.setExtendedUserFromUser(user);
+                    currentUserManager.setUser(user);
                 } else {
                     // Handle error response
                     Toast.makeText(getActivity(), "Failed to update profile", Toast.LENGTH_SHORT).show();

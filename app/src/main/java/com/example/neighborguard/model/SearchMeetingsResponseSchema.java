@@ -2,10 +2,10 @@ package com.example.neighborguard.model;
 
 import java.util.ArrayList;
 
-public class ExtendedUser extends User{
-    private ArrayList<Meeting> meetings;
+public class SearchMeetingsResponseSchema {
+    private ArrayList<Meeting> meetings = new ArrayList<>();
 
-    public ExtendedUser(){
+    public SearchMeetingsResponseSchema() {
     }
 
     public ArrayList<Meeting> getMeetings() {
@@ -16,9 +16,16 @@ public class ExtendedUser extends User{
         this.meetings = meetings;
     }
 
+    public Meeting getFirstMeeting() {
+        if (meetings.isEmpty()) {
+            return null;
+        }
+        return meetings.get(0);
+    }
+
     @Override
     public String toString() {
-        return "ExtendedUser{" +
+        return "SearchMeetingsResponseSchema{" +
                 "meetings=" + meetings +
                 '}';
     }
