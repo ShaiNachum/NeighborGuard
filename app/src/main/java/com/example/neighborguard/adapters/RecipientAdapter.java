@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.example.neighborguard.R;
 import com.example.neighborguard.api.ApiController;
 import com.example.neighborguard.api.MeetingApi;
+import com.example.neighborguard.enums.MeetingAssistanceStatusEnum;
 import com.example.neighborguard.enums.MeetingStatusEnum;
 import com.example.neighborguard.interfaces.Callback_recipient;
 import com.example.neighborguard.model.CurrentUserManager;
@@ -31,6 +32,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -144,15 +146,34 @@ public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.Reci
 
 
     private String getServicesText(User recipient) {
-        // Check if services list exists and is not empty
+        // Check if services map exists and is not empty
         if (recipient.getServices() == null || recipient.getServices().isEmpty()) {
             return "Services: none";
         }
 
-        // Join all services with comma and space
-        String servicesString = String.join(", ", recipient.getServices());
+        StringBuilder servicesText = new StringBuilder("Services: ");
+        boolean isFirst = true;
 
-        return "Services: " + servicesString;
+        // Always check if General Check needs assistance
+        if (recipient.getServices().containsKey("General Check") &&
+                recipient.getServices().get("General Check") == MeetingAssistanceStatusEnum.NEED_ASSISTANCE) {
+            servicesText.append("General Check");
+            isFirst = false;
+        }
+
+        // Add other services that need assistance
+        for (Map.Entry<String, MeetingAssistanceStatusEnum> entry : recipient.getServices().entrySet()) {
+            if (!entry.getKey().equals("General Check") &&
+                    entry.getValue() == MeetingAssistanceStatusEnum.NEED_ASSISTANCE) {
+                if (!isFirst) {
+                    servicesText.append(", ");
+                }
+                servicesText.append(entry.getKey());
+                isFirst = false;
+            }
+        }
+
+        return servicesText.toString();
     }
 
 
@@ -343,12 +364,23 @@ public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.Reci
             User recipient = recipients.get(position);
             User volunteer = currentUserManager.getUser();
 
+            // Create list of services that need assistance
+            ArrayList<String> neededServices = new ArrayList<>();
+
+            // Add all services that need assistance
+            for (Map.Entry<String, MeetingAssistanceStatusEnum> entry : recipient.getServices().entrySet()) {
+                if (entry.getValue() == MeetingAssistanceStatusEnum.NEED_ASSISTANCE) {
+                    neededServices.add(entry.getKey());
+                }
+            }
+
             // Create the meeting request
             NewMeeting newMeeting = new NewMeeting();
             newMeeting.setRecipient(recipient);
             newMeeting.setVolunteer(volunteer);
             newMeeting.setDate(System.currentTimeMillis() / 1000L);
             newMeeting.setStatus(MeetingStatusEnum.IS_PICKED);
+            newMeeting.setServices(neededServices);
 
             // Make the API call
             meetingApi.createMeeting(newMeeting).enqueue(new Callback<Meeting>() {
@@ -396,7 +428,9 @@ public class RecipientAdapter extends RecyclerView.Adapter<RecipientAdapter.Reci
         }
 
         private void performCancellation() {
-            meetingApi.cancelMeeting(meetingID).enqueue(new Callback<Void>() {
+            String volunteerUID = currentUserManager.getUser().getUid();
+
+            meetingApi.cancelMeeting(meetingID, volunteerUID).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful()) {

@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    tools:context=".ui.RegisterActivity">
+    tools:context=".ui.RegisterActivity"
+    android:background="@drawable/pearl_gradient"
+    >
 
     <LinearLayout
         android:id="@+id/main"
@@ -250,7 +252,9 @@
                 android:id="@+id/register_SPN_age"
                 android:layout_width="175dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp" />
+                android:layout_marginLeft="15dp"
+                android:background="@color/white"
+                />
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.appcompat.widget.LinearLayoutCompat
@@ -273,7 +277,9 @@
                 android:id="@+id/register_SPN_gender"
                 android:layout_width="175dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp" />
+                android:layout_marginLeft="15dp"
+                android:background="@color/white"
+                />
         </androidx.appcompat.widget.LinearLayoutCompat>
 
 

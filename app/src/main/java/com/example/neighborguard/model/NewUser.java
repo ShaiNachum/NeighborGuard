@@ -1,13 +1,16 @@
 package com.example.neighborguard.model;
 
-import com.example.neighborguard.enums.UserAssistanceStatusEnum;
+import com.example.neighborguard.enums.MeetingAssistanceStatusEnum;
 import com.example.neighborguard.enums.UserGenderEnum;
 import com.example.neighborguard.enums.UserRoleEnum;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
-public class NewUser {
+public class NewUser implements Serializable {
+    private static final long serialVersionUID = 1L;
     private UserRoleEnum role;
     private String firstName;
     private String lastName;
@@ -15,14 +18,13 @@ public class NewUser {
     private int age;
     private UserGenderEnum gender;
     private ArrayList<String> languages;
-    private ArrayList<String> services;
+    private HashMap<String, MeetingAssistanceStatusEnum> services;
     private Address address;
     private String email;
     private String password;
     private LonLat lonLat;
     private long lastOK;
     private String profileImage;
-    private UserAssistanceStatusEnum assistanceStatus;
 
 
     public NewUser() {
@@ -76,11 +78,11 @@ public class NewUser {
         this.gender = gender;
     }
 
-    public ArrayList<String> getServices() {
+    public HashMap<String, MeetingAssistanceStatusEnum> getServices() {
         return services;
     }
 
-    public void setServices(ArrayList<String> services) {
+    public void setServices(HashMap<String, MeetingAssistanceStatusEnum> services) {
         this.services = services;
     }
 
@@ -140,13 +142,6 @@ public class NewUser {
         this.profileImage = profileImage;
     }
 
-    public UserAssistanceStatusEnum getAssistanceStatus() {
-        return assistanceStatus;
-    }
-
-    public void setAssistanceStatus(UserAssistanceStatusEnum assistanceStatus) {
-        this.assistanceStatus = assistanceStatus;
-    }
 
     @Override
     public String toString() {
@@ -165,7 +160,6 @@ public class NewUser {
                 ", lonLat=" + lonLat +
                 ", lastOK=" + lastOK +
                 ", profileImage='" + profileImage + '\'' +
-                ", assistanceStatus=" + assistanceStatus +
                 '}';
     }
 }

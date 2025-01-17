@@ -23,4 +23,6 @@
     <!-- Recipient check icon dimensions -->
     <dimen name="recipient_check_icon_size_expanded">28dp</dimen>
     <dimen name="recipient_check_icon_size_collapsed">20dp</dimen>
+    <dimen name="horizontal_meeting_item_text_size">16sp</dimen>
+    <dimen name="activity_meeting_data_text_size">18sp</dimen>
 </resources>

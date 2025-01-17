@@ -82,10 +82,13 @@ public class ListFragment extends Fragment {
 
         call.enqueue(new Callback<SearchUsersResponseSchema>() {
             @Override
-            public void onResponse(Call<SearchUsersResponseSchema> call, Response<SearchUsersResponseSchema> response) {
+            public void onResponse(
+                    Call<SearchUsersResponseSchema> call,
+                    Response<SearchUsersResponseSchema> response)
+            {
                 if (response.isSuccessful() && response.body() != null) {
                     recipients.clear();
-                    ArrayList<User> users = response.body().getUsers();  // Changed from ExtendedUser
+                    ArrayList<User> users = response.body().getUsers();
                     if (users != null && !users.isEmpty()) {
                         recipients.addAll(users);
                         recipientAdapter.notifyDataSetChanged();

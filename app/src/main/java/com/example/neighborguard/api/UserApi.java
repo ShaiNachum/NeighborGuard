@@ -39,7 +39,7 @@ public interface UserApi {
             @Path("email") String email
     );
 
-    @PUT("user/{uid}")
+    @PUT("/user/{uid}")
     Call<Void> updateUser(
             @Path("uid") String uid,
             @Body User user

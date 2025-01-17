@@ -18,8 +18,11 @@ public interface MeetingApi {
     @POST("/meeting")
     Call<Meeting> createMeeting(@Body NewMeeting newMeeting);
 
-    @DELETE("/meeting/{id}")
-    Call<Void> cancelMeeting(@Path("id") String meetingId);
+    @DELETE("/meeting/{uid}/{userID}")
+    Call<Void> cancelMeeting(
+            @Path("uid") String meetingId,
+            @Path("userID") String userId
+    );
 
     @GET("/meetings")
     Call<SearchMeetingsResponseSchema> getMeetings(
@@ -27,9 +30,9 @@ public interface MeetingApi {
             @Query("status") String status
     );
 
-    @PUT("/meeting/{id}/status")
+    @PUT("/meeting/{uid}/status")
     Call<Meeting> updateMeetingStatus(
-            @Path("id") String meetingId,
+            @Path("uid") String meetingId,
             @Query("status") String status
     );
 }

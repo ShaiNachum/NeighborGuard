@@ -12,6 +12,8 @@
         android:id="@+id/list_LST_recipients"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        tools:itemCount="3"
+        tools:listitem="@layout/horizontal_recipient_item"
         />
 
 </androidx.appcompat.widget.LinearLayoutCompat>

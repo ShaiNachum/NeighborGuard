@@ -1,6 +1,7 @@
 package com.example.neighborguard.ui.home;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,18 +11,26 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.neighborguard.adapters.MeetingAdapter;
 import com.example.neighborguard.api.ApiController;
+import com.example.neighborguard.api.MeetingApi;
 import com.example.neighborguard.api.UserApi;
 import com.example.neighborguard.databinding.FragmentHomeBinding;
+import com.example.neighborguard.enums.MeetingAssistanceStatusEnum;
+import com.example.neighborguard.enums.MeetingStatusEnum;
 import com.example.neighborguard.interfaces.Callback_recipient;
 import com.example.neighborguard.model.CurrentUserManager;
+import com.example.neighborguard.model.Meeting;
+import com.example.neighborguard.model.SearchMeetingsResponseSchema;
 import com.example.neighborguard.model.User;
-import com.example.neighborguard.enums.UserAssistanceStatusEnum;
 import com.example.neighborguard.enums.UserRoleEnum;
 import com.example.neighborguard.utils.DialogUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,18 +39,21 @@ import retrofit2.Response;
 
 public class HomeFragment extends Fragment {
     private UserApi userApi;
+    private MeetingApi meetingApi;
     private FragmentHomeBinding binding;
     private CurrentUserManager currentUserManager;
 
     private ListFragment listFragment;
+    private MapFragment mapFragment;
 
     private ArrayList<String> services;
     private String[] servicesArray;
     private boolean[] selectedServices;
     private ArrayList<Integer> servicesList;
-    private ArrayList<String> selectedServicesList;
+    private HashMap<String, MeetingAssistanceStatusEnum> selectedServicesList;
 
-    private MapFragment mapFragment;
+    private MeetingAdapter meetingAdapter;
+    private ArrayList<Meeting> meetings;
 
 
 
@@ -57,7 +69,11 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         currentUserManager = CurrentUserManager.getInstance();
+
+        meetings = new ArrayList<>();
+
         userApi = ApiController.getRetrofitInstance().create(UserApi.class);
+        meetingApi = ApiController.getRetrofitInstance().create(MeetingApi.class);
 
         setUserUIByRole(currentUserManager.getUser().getRole());
 
@@ -96,35 +112,100 @@ public class HomeFragment extends Fragment {
         else {//is Recipient
             binding.homeRecipientBTNIAmOk.setOnClickListener(View -> iAmOkClicked());
 
+            fetchMeetings();
+            meetingAdapter = new MeetingAdapter(getContext(), meetings);
+            binding.homeRecipientFRAMENextMeetingsList.setLayoutManager(new LinearLayoutManager(getContext()));
+            binding.homeRecipientFRAMENextMeetingsList.setAdapter(meetingAdapter);
+
             binding.homeRecipientBTNPost.setOnClickListener(View -> postClicked());
             initServices();
         }
     }
 
-    private void initServices() {
-        services = new ArrayList<>();
-        services.add("Handyman");
-        services.add("Dog Walker");
-        services.add("Groceries Shopping");
+    private void fetchMeetings() {
+        String userId = currentUserManager.getUser().getUid();
+        MeetingStatusEnum status = MeetingStatusEnum.IS_PICKED;
 
-        servicesArray = services.toArray(new String[0]);
-        selectedServices = new boolean[servicesArray.length];
-        servicesList = new ArrayList<>();
-        selectedServicesList = new ArrayList<>();
-
-        binding.homeRecipientLBLSelectServices.setOnClickListener(v ->
-                DialogUtils.showMultiChoiceDialog(
-                        getContext(),
-                        "Select Services",
-                        servicesArray,
-                        selectedServices,
-                        servicesList,
-                        selectedServicesList,
-                        binding.homeRecipientLBLSelectServices,
-                        "Select Services"
-                )
+        Call<SearchMeetingsResponseSchema> call = meetingApi.getMeetings(
+                userId,
+                status.toString()
         );
+
+        call.enqueue(new Callback<SearchMeetingsResponseSchema>() {
+            @Override
+            public void onResponse(
+                    Call<SearchMeetingsResponseSchema> call,
+                    Response<SearchMeetingsResponseSchema> response)
+            {
+                // Clear the meetings list first
+                meetings.clear();
+                meetingAdapter.notifyDataSetChanged();  // Tell adapter the data changed
+
+                if (response.isSuccessful() && response.body() != null) {
+                    meetings.clear();
+                    ArrayList<Meeting> receivedMeetings  = response.body().getMeetings();
+                    if (receivedMeetings  != null && !receivedMeetings .isEmpty()) {
+                        meetings.addAll(receivedMeetings);
+                        meetingAdapter.notifyDataSetChanged();
+                    } else {
+                        Toast.makeText(getContext(), "No meetings found", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Failed to load meetings", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SearchMeetingsResponseSchema> call, Throwable t) {
+                Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
+    private void initServices() {
+    // Initialize service collections
+    services = new ArrayList<>();
+    // Don't add General Check since recipients shouldn't see it
+    services.add("Handyman");
+    services.add("Dog Walker");
+    services.add("Groceries Shopping");
+
+    servicesArray = services.toArray(new String[0]);
+    selectedServices = new boolean[servicesArray.length];
+    servicesList = new ArrayList<>();
+    selectedServicesList = new HashMap<>();
+
+    // Initialize services map with current user's services if they exist
+    HashMap<String, MeetingAssistanceStatusEnum> currentServices =
+            currentUserManager.getUser().getServices();
+
+    // Pre-select services that are currently marked as NEED_ASSISTANCE
+    for (int i = 0; i < services.size(); i++) {
+        String service = services.get(i);
+        if (currentServices != null &&
+                currentServices.containsKey(service) &&
+                currentServices.get(service) == MeetingAssistanceStatusEnum.NEED_ASSISTANCE) {
+            selectedServices[i] = true;
+            servicesList.add(i);
+        }
+    }
+
+    // Set up dialog click listener
+    binding.homeRecipientLBLSelectServices.setOnClickListener(v ->
+            DialogUtils.showServicesMultiChoiceDialog(
+                    getContext(),
+                    "Select Services",
+                    servicesArray,
+                    selectedServices,
+                    servicesList,
+                    selectedServicesList,
+                    binding.homeRecipientLBLSelectServices,
+                    "Select Services",
+                    UserRoleEnum.RECIPIENT,
+                    currentServices  // Pass current services for IN_PROGRESS checking
+            )
+    );
+}
 
     private void updateUserInBackend(User user, View progressBar, String successMessage) {
         // Show progress bar
@@ -156,40 +237,85 @@ public class HomeFragment extends Fragment {
 
     private void postClicked() {
         User user = currentUserManager.getUser();
+        HashMap<String, MeetingAssistanceStatusEnum> currentServices = user.getServices();
+        HashMap<String, MeetingAssistanceStatusEnum> updatedServices = new HashMap<>();
 
-        user.setServices(selectedServicesList);
-
-        if (selectedServicesList.isEmpty() && user.getAssistanceStatus() == UserAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE) {
-            user.setAssistanceStatus(UserAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE);
-        } else {
-            user.setAssistanceStatus(UserAssistanceStatusEnum.NEED_ASSISTANCE);
+        // Step 1: Keep General Check's current status
+        if (currentServices.containsKey("General Check")) {
+            updatedServices.put("General Check", currentServices.get("General Check"));
         }
 
-        updateUserInBackend(user, binding.homeRecipientPBProgressBar, selectedServicesList.isEmpty() ? "Services cleared successfully" : "Services updated successfully");
-    }
+        // Step 2: Go through each service (except General Check) and set its status
+        for (String service : services) {
+            // Skip General Check as we already handled it
+            if (service.equals("General Check")) {
+                continue;
+            }
 
+            // If service is IN_PROGRESS, keep it that way
+            if (currentServices.containsKey(service) &&
+                    currentServices.get(service) == MeetingAssistanceStatusEnum.IN_PROGRESS) {
+                updatedServices.put(service, MeetingAssistanceStatusEnum.IN_PROGRESS);
+            }
+            // If service was selected in dialog, set to NEED_ASSISTANCE
+            else if (selectedServicesList.containsKey(service) &&
+                    selectedServicesList.get(service) == MeetingAssistanceStatusEnum.NEED_ASSISTANCE) {
+                updatedServices.put(service, MeetingAssistanceStatusEnum.NEED_ASSISTANCE);
+            }
+            // Otherwise, set to DO_NOT_NEED_ASSISTANCE
+            else {
+                updatedServices.put(service, MeetingAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE);
+            }
+        }
+
+        user.setServices(updatedServices);
+        updateUserInBackend(user, binding.homeRecipientPBProgressBar, "Services updated successfully");
+    }
 
     private void iAmOkClicked() {
         User user = currentUserManager.getUser();
+        HashMap<String, MeetingAssistanceStatusEnum> userServices = user.getServices();
 
         // Set the current time in seconds since epoch
         user.setLastOK(System.currentTimeMillis() / 1000L);
 
-        // Only set DO_NOT_NEED_ASSISTANCE if there are no active services
-        if (user.getServices().isEmpty()) {
-            user.setAssistanceStatus(UserAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE);
-        }
+        userServices.put("General Check", MeetingAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE);
 
+        // Always update backend when I am OK is clicked
         updateUserInBackend(user, binding.homePBProgressBar, "I am OK - Updated");
     }
 
+    private String buildServiceDisplayText(HashMap<String, MeetingAssistanceStatusEnum> services) {
+        // Create a string of active services (IN_PROGRESS or NEED_ASSISTANCE), excluding General Check
+        StringBuilder text = new StringBuilder();
+        boolean isFirst = true;
+
+        for (Map.Entry<String, MeetingAssistanceStatusEnum> entry : services.entrySet()) {
+            String service = entry.getKey();
+            MeetingAssistanceStatusEnum status = entry.getValue();
+
+            // Skip General Check and only include services that are active
+            if (!service.equals("General Check") &&
+                    (status == MeetingAssistanceStatusEnum.IN_PROGRESS ||
+                            status == MeetingAssistanceStatusEnum.NEED_ASSISTANCE)) {
+
+                if (!isFirst) {
+                    text.append(", ");
+                }
+                text.append(service);
+                isFirst = false;
+            }
+        }
+
+        return text.length() > 0 ? text.toString() : "Select Services";
+    }
 
     private void setUserUIByRole(UserRoleEnum role) {
         if(role == UserRoleEnum.VOLUNTEER){
             binding.homeRecipientFLUpperPart.setVisibility(View.GONE);
             binding.homeRecipientBTNIAmOk.setVisibility(View.GONE);
             binding.homeRecipientLBLNextMeetings.setVisibility(View.GONE);
-            binding.homeRecipientFRAMENextMeetingsList.setVisibility(View.GONE);
+            binding.homeRecipientFLMiddleSection.setVisibility(View.GONE);
             binding.homeRecipientLLServices.setVisibility(View.GONE);
             binding.homeRecipientBTNPost.setVisibility(View.GONE);
             binding.homeVolunteerFRAMEList.setVisibility(View.VISIBLE);
@@ -199,15 +325,25 @@ public class HomeFragment extends Fragment {
             binding.homeRecipientFLUpperPart.setVisibility(View.VISIBLE);
             binding.homeRecipientBTNIAmOk.setVisibility(View.VISIBLE);
             binding.homeRecipientLBLNextMeetings.setVisibility(View.VISIBLE);
-            binding.homeRecipientFRAMENextMeetingsList.setVisibility(View.VISIBLE);
+            binding.homeRecipientFLMiddleSection.setVisibility(View.VISIBLE);
             binding.homeRecipientLLServices.setVisibility(View.VISIBLE);
-            if(currentUserManager.getUser().getServices().isEmpty())
-                binding.homeRecipientLBLSelectServices.setText("Select Services");
-            else
-                binding.homeRecipientLBLSelectServices.setText(String.valueOf(currentUserManager.getUser().getServices()));
             binding.homeRecipientBTNPost.setVisibility(View.VISIBLE);
             binding.homeVolunteerFRAMEList.setVisibility(View.GONE);
             binding.homeVolunteerFRAMEMap.setVisibility(View.GONE);
+            // Configure the services text display
+            HashMap<String, MeetingAssistanceStatusEnum> currentServices =
+                    currentUserManager.getUser().getServices();
+
+            // Set the services text, handling empty services case
+            String servicesText = currentServices.isEmpty() ?
+                    "Select Services" :
+                    buildServiceDisplayText(currentServices);
+
+            binding.homeRecipientLBLSelectServices.setText(servicesText);
+
+            // Ensure text stays on one line with ellipsis if needed
+            binding.homeRecipientLBLSelectServices.setSingleLine(true);
+            binding.homeRecipientLBLSelectServices.setEllipsize(TextUtils.TruncateAt.END);
         }
     }
 
@@ -216,5 +352,14 @@ public class HomeFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh meetings list whenever fragment becomes visible
+        if (currentUserManager.getUser().getRole() == UserRoleEnum.RECIPIENT) {
+            fetchMeetings();
+        }
     }
 }

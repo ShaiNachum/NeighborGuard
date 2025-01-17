@@ -2,16 +2,20 @@ package com.example.neighborguard.model;
 
 import com.example.neighborguard.enums.MeetingStatusEnum;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 
 
 
 
-public class NewMeeting {
+public class NewMeeting implements Serializable {
+    private static final long serialVersionUID = 1L;
     private User recipient;
     private User volunteer;
     private long date;
-    private MeetingStatusEnum status;
+    private MeetingStatusEnum meetingStatus;
+    private ArrayList<String> services;
 
 
     public NewMeeting() {
@@ -42,11 +46,19 @@ public class NewMeeting {
     }
 
     public MeetingStatusEnum getStatus() {
-        return status;
+        return meetingStatus;
     }
 
     public void setStatus(MeetingStatusEnum status) {
-        this.status = status;
+        this.meetingStatus = status;
+    }
+
+    public ArrayList<String> getServices() {
+        return services;
+    }
+
+    public void setServices(ArrayList<String> services) {
+        this.services = services;
     }
 
     @Override
@@ -55,7 +67,8 @@ public class NewMeeting {
                 "recipient=" + recipient +
                 ", volunteer=" + volunteer +
                 ", date=" + date +
-                ", status=" + status +
+                ", meetingStatus=" + meetingStatus +
+                ", services=" + services +
                 '}';
     }
 }

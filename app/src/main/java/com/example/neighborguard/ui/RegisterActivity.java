@@ -23,11 +23,11 @@ import com.bumptech.glide.Glide;
 import com.example.neighborguard.api.ApiController;
 import com.example.neighborguard.api.UserApi;
 import com.example.neighborguard.databinding.ActivityRegisterBinding;
+import com.example.neighborguard.enums.MeetingAssistanceStatusEnum;
 import com.example.neighborguard.model.Address;
 import com.example.neighborguard.model.LonLat;
 import com.example.neighborguard.model.NewUser;
 import com.example.neighborguard.model.User;
-import com.example.neighborguard.enums.UserAssistanceStatusEnum;
 import com.example.neighborguard.enums.UserGenderEnum;
 import com.example.neighborguard.enums.UserRoleEnum;
 import com.example.neighborguard.utils.DialogUtils;
@@ -40,6 +40,7 @@ import com.google.firebase.auth.FirebaseUser;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -72,7 +73,7 @@ public class RegisterActivity extends AppCompatActivity {
     private String[] servicesArray;
     private boolean[] selectedServices;
     private ArrayList<Integer> servicesList;
-    private ArrayList<String> selectedServicesList;
+    private HashMap<String, MeetingAssistanceStatusEnum> selectedServicesList;
 
     private Address address;
     private String city;
@@ -129,6 +130,12 @@ public class RegisterActivity extends AppCompatActivity {
         binding.registerCRDCamera.setOnClickListener(View -> cameraClicked());
         binding.registerCRDPhotos.setOnClickListener(View -> photosClicked());
 
+        if (binding.registerRDBVolunteer.isChecked()) {
+            role = UserRoleEnum.VOLUNTEER;
+        } else if (binding.registerRDBRecipient.isChecked()) {
+            role = UserRoleEnum.RECIPIENT;
+        }
+
         binding.registerRGPRole.setOnCheckedChangeListener((group, checkedId) -> roleChanged(group, checkedId));
 
         initAges();
@@ -138,17 +145,66 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void roleChanged(RadioGroup group, int checkedId) {
+        // Clear previous selections
+        selectedServicesList.clear();
+
         if (checkedId == binding.registerRDBVolunteer.getId()) {
+            role = UserRoleEnum.VOLUNTEER;
+            // Show services selection for volunteers
             binding.registerLBLSelectServices.setVisibility(View.VISIBLE);
             binding.registerLBLServices.setVisibility(View.VISIBLE);
-        } else {
+
+            // Initialize volunteer services
+            for (String service : services) {
+                // For volunteers: General Check is always PROVIDE, others are DO_NOT_PROVIDE
+                MeetingAssistanceStatusEnum status = service.equals("General Check") ?
+                        MeetingAssistanceStatusEnum.PROVIDE :
+                        MeetingAssistanceStatusEnum.DO_NOT_PROVIDE;
+                selectedServicesList.put(service, status);
+            }
+        } else if (checkedId == binding.registerRDBRecipient.getId()) {
+            role = UserRoleEnum.RECIPIENT;
+            // Hide service selection for recipients
             binding.registerLBLSelectServices.setVisibility(View.GONE);
             binding.registerLBLServices.setVisibility(View.GONE);
-            // Clear selected services when switching to recipient
-            selectedServicesList.clear();
-            selectedServices = new boolean[servicesArray.length];
-            binding.registerLBLSelectServices.setText("Select Services");
+
+            // Initialize recipient services
+            for (String service : services) {
+                selectedServicesList.put(service, MeetingAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE);
+            }
         }
+
+        // Reset selection arrays
+        for (int i = 0; i < selectedServices.length; i++) {
+            selectedServices[i] = false;
+        }
+        servicesList.clear();
+        binding.registerLBLSelectServices.setText("Select Services");
+
+        // Update the click listener with the new role
+        setupServicesClickListener();
+    }
+
+    // New method to handle services click listener
+    private void setupServicesClickListener() {
+        binding.registerLBLSelectServices.setOnClickListener(v -> {
+            if (role != null) {  // Only show dialog if role is selected
+                DialogUtils.showServicesMultiChoiceDialog(
+                        this,
+                        "Select Services",
+                        servicesArray,
+                        selectedServices,
+                        servicesList,
+                        selectedServicesList,
+                        binding.registerLBLSelectServices,
+                        "Select Services",
+                        role,
+                        null
+                );
+            } else {
+                Toast.makeText(this, "Please select a role first", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 
@@ -311,7 +367,9 @@ public class RegisterActivity extends AppCompatActivity {
 
 
     private void initServices() {
+        // Initialize lists and arrays
         services = new ArrayList<>();
+        services.add("General Check");
         services.add("Handyman");
         services.add("Dog Walker");
         services.add("Groceries Shopping");
@@ -319,20 +377,32 @@ public class RegisterActivity extends AppCompatActivity {
         servicesArray = services.toArray(new String[0]);
         selectedServices = new boolean[servicesArray.length];
         servicesList = new ArrayList<>();
-        selectedServicesList = new ArrayList<>();
+        selectedServicesList = new HashMap<>();
 
-        binding.registerLBLSelectServices.setOnClickListener(v ->
-                DialogUtils.showMultiChoiceDialog(
-                        this,
-                        "Select Services",
-                        servicesArray,
-                        selectedServices,
-                        servicesList,
-                        selectedServicesList,
-                        binding.registerLBLSelectServices,
-                        "Select Services"
-                )
-        );
+        // Initialize based on initial role (which should be set in initViews)
+        if (role == UserRoleEnum.VOLUNTEER) {
+            binding.registerLBLSelectServices.setVisibility(View.VISIBLE);
+            binding.registerLBLServices.setVisibility(View.VISIBLE);
+
+            // Set initial services for volunteer
+            for (String service : services) {
+                MeetingAssistanceStatusEnum status = service.equals("General Check") ?
+                        MeetingAssistanceStatusEnum.PROVIDE :
+                        MeetingAssistanceStatusEnum.DO_NOT_PROVIDE;
+                selectedServicesList.put(service, status);
+            }
+        } else {
+            binding.registerLBLSelectServices.setVisibility(View.GONE);
+            binding.registerLBLServices.setVisibility(View.GONE);
+
+            // Set initial services for recipient
+            for (String service : services) {
+                selectedServicesList.put(service, MeetingAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE);
+            }
+        }
+
+        // Set up the click listener
+        setupServicesClickListener();
     }
 
 
@@ -472,9 +542,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Set the current time in seconds since epoch
         newUser.setLastOK(System.currentTimeMillis() / 1000L);
-
-        // Set the assistance status to DO_NOT_NEED_ASSISTANCE
-        newUser.setAssistanceStatus(UserAssistanceStatusEnum.DO_NOT_NEED_ASSISTANCE);
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {

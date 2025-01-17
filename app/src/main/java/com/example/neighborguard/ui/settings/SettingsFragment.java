@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +25,7 @@ import com.example.neighborguard.R;
 import com.example.neighborguard.api.ApiController;
 import com.example.neighborguard.api.UserApi;
 import com.example.neighborguard.databinding.FragmentSettingsBinding;
+import com.example.neighborguard.enums.MeetingAssistanceStatusEnum;
 import com.example.neighborguard.model.Address;
 import com.example.neighborguard.model.CurrentUserManager;
 import com.example.neighborguard.model.LonLat;
@@ -39,6 +39,8 @@ import com.google.firebase.auth.FirebaseUser;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -67,7 +69,7 @@ public class SettingsFragment extends Fragment{
     private String[] servicesArray;
     private boolean[] selectedServices;
     private ArrayList<Integer> servicesList;
-    private ArrayList<String> selectedServicesList;
+    private HashMap<String, MeetingAssistanceStatusEnum> selectedServicesList;
 
     private Address address;
     private String city;
@@ -262,13 +264,32 @@ public class SettingsFragment extends Fragment{
         binding.settingsEDTPhoneNumber.setText(String.valueOf(currentUserManager.getUser().getPhoneNumber()));
         binding.settingsLBLSelectLanguages.setText(String.valueOf(currentUserManager.getUser().getLanguages()));
 
-        // Hide services selection if user is RECIPIENT
+        // Handle services display
         if (currentUserManager.getUser().getRole() == UserRoleEnum.RECIPIENT) {
             binding.settingsLBLServices.setVisibility(View.GONE);
             binding.settingsLBLSelectServices.setVisibility(View.GONE);
-        }
-        else{
-            binding.settingsLBLSelectServices.setText(String.valueOf(currentUserManager.getUser().getServices()));
+        } else {
+            // For volunteers, show currently provided services
+            StringBuilder servicesText = new StringBuilder();
+            HashMap<String, MeetingAssistanceStatusEnum> userServices =
+                    currentUserManager.getUser().getServices();
+
+            // We'll only show services that are PROVIDE, but skip showing General Check
+            boolean isFirst = true;  // Track if this is the first service to handle commas
+            for (Map.Entry<String, MeetingAssistanceStatusEnum> entry : userServices.entrySet()) {
+                if (!entry.getKey().equals("General Check") &&
+                        entry.getValue() == MeetingAssistanceStatusEnum.PROVIDE) {
+                    if (!isFirst) {
+                        servicesText.append(", ");
+                    }
+                    servicesText.append(entry.getKey());
+                    isFirst = false;
+                }
+            }
+
+            binding.settingsLBLSelectServices.setText(
+                    servicesText.length() > 0 ? servicesText.toString() : "Select Services"
+            );
         }
 
         binding.settingsEDTCity.setText(currentUserManager.getUser().getAddress().getCity());
@@ -310,6 +331,11 @@ public class SettingsFragment extends Fragment{
 
 
     private void initServices() {
+        // Only initialize services for volunteers
+        if (currentUserManager.getUser().getRole() != UserRoleEnum.VOLUNTEER) {
+            return;
+        }
+
         services = new ArrayList<>();
         services.add("Handyman");
         services.add("Dog Walker");
@@ -318,10 +344,27 @@ public class SettingsFragment extends Fragment{
         servicesArray = services.toArray(new String[0]);
         selectedServices = new boolean[servicesArray.length];
         servicesList = new ArrayList<>();
-        selectedServicesList = new ArrayList<>();
+        selectedServicesList = new HashMap<>();
+
+        // Get current services from user
+        HashMap<String, MeetingAssistanceStatusEnum> currentServices =
+                currentUserManager.getUser().getServices();
+
+        // Initialize selection state from current services
+        for (int i = 0; i < services.size(); i++) {
+            String service = services.get(i);
+            if (currentServices.containsKey(service) &&
+                    currentServices.get(service) == MeetingAssistanceStatusEnum.PROVIDE) {
+                selectedServices[i] = true;
+                servicesList.add(i);
+            }
+        }
+
+        // Initialize selectedServicesList with current values
+        selectedServicesList.putAll(currentServices);
 
         binding.settingsLBLSelectServices.setOnClickListener(v ->
-                DialogUtils.showMultiChoiceDialog(
+                DialogUtils.showServicesMultiChoiceDialog(
                         getContext(),
                         "Select Services",
                         servicesArray,
@@ -329,7 +372,9 @@ public class SettingsFragment extends Fragment{
                         servicesList,
                         selectedServicesList,
                         binding.settingsLBLSelectServices,
-                        "Select Services"
+                        "Select Services",
+                        UserRoleEnum.VOLUNTEER,
+                        currentServices
                 )
         );
     }
@@ -381,10 +426,29 @@ public class SettingsFragment extends Fragment{
         }
 
         // Services
-        if (!selectedServicesList.isEmpty() && !selectedServicesList.equals(user.getServices())) {
-            user.setServices(selectedServicesList);
-            isChanged = true;
-            Toast.makeText(getActivity(), "Service updated", Toast.LENGTH_SHORT).show();
+        if (currentUserManager.getUser().getRole() == UserRoleEnum.VOLUNTEER) {
+            HashMap<String, MeetingAssistanceStatusEnum> currentServices = user.getServices();
+            HashMap<String, MeetingAssistanceStatusEnum> updatedServices = new HashMap<>();
+
+            // Always ensure General Check is PROVIDE for volunteers
+            updatedServices.put("General Check", MeetingAssistanceStatusEnum.PROVIDE);
+
+            // Update other services based on selection
+            for (String service : services) {
+                if (!service.equals("General Check")) {
+                    boolean isSelected = selectedServices[services.indexOf(service)];
+                    updatedServices.put(service,
+                            isSelected ? MeetingAssistanceStatusEnum.PROVIDE :
+                                    MeetingAssistanceStatusEnum.DO_NOT_PROVIDE);
+                }
+            }
+
+            // Check if services have actually changed
+            if (!areServicesEqual(currentServices, updatedServices)) {
+                user.setServices(updatedServices);
+                isChanged = true;
+                Toast.makeText(getActivity(), "Services updated", Toast.LENGTH_SHORT).show();
+            }
         }
 
         // City
@@ -499,5 +563,21 @@ public class SettingsFragment extends Fragment{
         if (getActivity() != null) {
             getActivity().finish();
         }
+    }
+
+    private boolean areServicesEqual(HashMap<String, MeetingAssistanceStatusEnum> map1,
+                                     HashMap<String, MeetingAssistanceStatusEnum> map2) {
+        if (map1.size() != map2.size()) {
+            return false;
+        }
+
+        for (Map.Entry<String, MeetingAssistanceStatusEnum> entry : map1.entrySet()) {
+            String key = entry.getKey();
+            if (!map2.containsKey(key) || map2.get(key) != entry.getValue()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

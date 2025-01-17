@@ -1,6 +1,9 @@
 package com.example.neighborguard.model;
 
-public class LonLat {
+import java.io.Serializable;
+
+public class LonLat implements Serializable {
+    private static final long serialVersionUID = 1L;
     private double longitude = 0;
     private double latitude = 0;
 

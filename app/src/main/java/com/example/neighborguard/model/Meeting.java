@@ -1,8 +1,10 @@
 package com.example.neighborguard.model;
 
 
+import java.io.Serializable;
 
-public class Meeting extends NewMeeting{
+public class Meeting extends NewMeeting implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String uid;
 
     public Meeting() {
