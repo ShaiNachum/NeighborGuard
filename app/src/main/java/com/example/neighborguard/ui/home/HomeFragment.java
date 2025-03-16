@@ -92,7 +92,7 @@ public class HomeFragment extends Fragment {
             listFragment.setCallbackRecipientClicked(new Callback_recipient() {
                 @Override
                 public void recipientClicked(double lat, double lng) {
-                    mapFragment.zoop(lat,lng);
+                    mapFragment.zoom(lat,lng);
                 }
             });
 

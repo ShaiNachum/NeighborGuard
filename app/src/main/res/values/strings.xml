@@ -1,4 +1,7 @@
 <resources>
+    <string name="my_map_api_key">AIzaSyA1ztOA4oFmNoHs_tWVzLas2JqhCrrLPDA</string>
+
+
     <string name="app_name">NeighborGuard</string>
     <string name="title_home">Home</string>
     <string name="title_meetings">Meetings</string>

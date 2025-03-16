@@ -56,4 +56,7 @@ dependencies {
     // Rest API calls
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+
+    // Maps SDK for Android
+    implementation(libs.play.services.maps)
 }
