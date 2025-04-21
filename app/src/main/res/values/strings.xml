@@ -1,5 +1,12 @@
 <resources>
-    <string name="my_map_api_key">AIzaSyA1ztOA4oFmNoHs_tWVzLas2JqhCrrLPDA</string>
+    <string name="permission_required_title">Permissions Required</string>
+    <string name="permission_required_message">NeighborGuard needs location, camera and storage permissions to function properly. Location is used to find nearby users, camera for profile photos, and storage to save photos.</string>
+    <string name="grant_permission">Grant Permissions</string>
+    <string name="not_now">Not Now</string>
+    <string name="permission_denied_title">Permissions Denied</string>
+    <string name="permission_denied_message">NeighborGuard needs these permissions to function properly. Please enable them in app settings.</string>
+    <string name="go_to_settings">Go to Settings</string>
+    <string name="cancel">Cancel</string>
 
 
     <string name="app_name">NeighborGuard</string>

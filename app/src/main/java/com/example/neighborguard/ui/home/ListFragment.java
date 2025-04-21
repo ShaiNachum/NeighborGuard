@@ -64,6 +64,15 @@ public class ListFragment extends Fragment {
                     callbackRecipient.recipientClicked(lat, lng);
                 }
             }
+
+            @Override
+            public void updateMapRecipients(ArrayList<User> recipients) {
+                // You can leave this method empty if the adapter doesn't need
+                // to update the map directly, or forward it to the parent callback
+                if (callbackRecipient != null) {
+                    callbackRecipient.updateMapRecipients(recipients);
+                }
+            }
         });
 
         //binding.listBTNSend.setOnClickListener(v -> itemClicked(32.1212, 34.1212));
@@ -92,6 +101,12 @@ public class ListFragment extends Fragment {
                     if (users != null && !users.isEmpty()) {
                         recipients.addAll(users);
                         recipientAdapter.notifyDataSetChanged();
+
+                        // Send recipients to the map
+                        if (callbackRecipient != null) {
+                            callbackRecipient.updateMapRecipients(new ArrayList<>(recipients));
+                        }
+
                     } else {
                         Toast.makeText(getContext(), "No recipients need assistance nearby", Toast.LENGTH_SHORT).show();
                     }

@@ -31,6 +31,8 @@ import com.example.neighborguard.model.User;
 import com.example.neighborguard.enums.UserGenderEnum;
 import com.example.neighborguard.enums.UserRoleEnum;
 import com.example.neighborguard.utils.DialogUtils;
+import com.example.neighborguard.utils.LocationManager;
+import com.example.neighborguard.utils.PermissionManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -93,7 +95,6 @@ public class RegisterActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 3000;
 
 
-
     @Override
     public void onStart() {
         super.onStart();
@@ -115,8 +116,6 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(view);
 
         mAuth = FirebaseAuth.getInstance();
-
-        checkAndRequestPermissions();
 
         initViews();
 
@@ -208,32 +207,26 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
 
-    private void photosClicked() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
-                checkAndRequestPermissions();
-                return;
-            }
-        } else if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            checkAndRequestPermissions();
-            return;
-        }
-
-        Intent photoIntent = new Intent(Intent.ACTION_PICK);
-        photoIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(photoIntent, IMG_REQ);
+private void photosClicked() {
+    if (!PermissionManager.hasAllPermissions(this)) {
+        Toast.makeText(this, "Storage permission required. Please grant it in app settings.", Toast.LENGTH_SHORT).show();
+        return;
     }
 
+    Intent photoIntent = new Intent(Intent.ACTION_PICK);
+    photoIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+    startActivityForResult(photoIntent, IMG_REQ);
+}
 
-    private void cameraClicked() {
-        if (checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            checkAndRequestPermissions();
-            return;
-        }
-
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(cameraIntent, CAM_REQ);
+private void cameraClicked() {
+    if (!PermissionManager.hasAllPermissions(this)) {
+        Toast.makeText(this, "Camera permission required. Please grant it in app settings.", Toast.LENGTH_SHORT).show();
+        return;
     }
+
+    Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    startActivityForResult(cameraIntent, CAM_REQ);
+}
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -270,25 +263,6 @@ public class RegisterActivity extends AppCompatActivity {
                     Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
                 }
             }
-        }
-    }
-
-
-    private void checkAndRequestPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13 and above
-            if (checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES}, PERMISSION_REQUEST_CODE);
-            }
-        } else {
-            // Below Android 13
-            if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
-            }
-        }
-
-        if (checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{android.Manifest.permission.CAMERA}, PERMISSION_REQUEST_CODE);
         }
     }
 
@@ -526,18 +500,17 @@ public class RegisterActivity extends AppCompatActivity {
         }
         newUser.setPassword(this.password);
 
-        if(role == UserRoleEnum.RECIPIENT){
-            //less then 1 KM
+        // Use LocationManager to get current location if available
+        LocationManager locationManager = LocationManager.getInstance();
+        if (locationManager.getCurrentLonLat() != null) {
+            // Use real location
+            lonLat = locationManager.getCurrentLonLat();
+        } else {
+            // Fallback to default location if real location is not available
             lonLat.setLatitude(32.114059);
             lonLat.setLongitude(34.798969);
-            //more then 1 KM
-            //lonLat.setLatitude(34.886812);
-            //lonLat.setLongitude(32.15549);
         }
-        else{
-            lonLat.setLatitude(32.119885);
-            lonLat.setLongitude(34.800303);
-        }
+
         newUser.setLonLat(lonLat);
 
         // Set the current time in seconds since epoch

@@ -140,7 +140,7 @@
 
 
 
-<!--VOLUNTEER LAYOUT:-->
+    <!--VOLUNTEER LAYOUT:-->
     <FrameLayout
         android:id="@+id/home_volunteer_FRAME_map"
         android:layout_width="match_parent"
@@ -159,13 +159,30 @@
         />
 
 
+    <!-- UPDATED: Added frame with border around the list section -->
     <FrameLayout
-        android:id="@+id/home_volunteer_FRAME_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="6"
+        android:layout_marginHorizontal="7dp"
+        android:padding="4dp"
+        android:background="@color/textColorDay"
         android:visibility="gone"
-        />
+        android:id="@+id/home_volunteer_LIST_container"> <!-- Outer frame with border color -->
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/pearl_gradient"> <!-- Inner frame with gradient background -->
+
+            <FrameLayout
+                android:id="@+id/home_volunteer_FRAME_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+        </FrameLayout>
+    </FrameLayout>
 
 
 </androidx.appcompat.widget.LinearLayoutCompat>

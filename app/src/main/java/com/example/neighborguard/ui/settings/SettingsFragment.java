@@ -33,6 +33,7 @@ import com.example.neighborguard.model.User;
 import com.example.neighborguard.enums.UserRoleEnum;
 import com.example.neighborguard.ui.LogInActivity;
 import com.example.neighborguard.utils.DialogUtils;
+import com.example.neighborguard.utils.LocationManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -551,6 +552,10 @@ public class SettingsFragment extends Fragment{
 
 
     private void logoutClicked() {
+        LocationManager locationManager = LocationManager.getInstance();
+        locationManager.setLocationUpdateCallback(null);
+        locationManager.stopLocationUpdates();
+
         FirebaseAuth.getInstance().signOut();
         switchToLoginActivity();
     }

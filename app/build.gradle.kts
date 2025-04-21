@@ -15,6 +15,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        resValue (
+            "string",
+            "MAPS_API_KEY",
+            "\"${project.findProperty("MAPS_API_KEY")}\""
+        )
     }
 
     buildTypes {
@@ -32,6 +38,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        resValues = true
     }
 }
 
@@ -59,4 +66,5 @@ dependencies {
 
     // Maps SDK for Android
     implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
 }

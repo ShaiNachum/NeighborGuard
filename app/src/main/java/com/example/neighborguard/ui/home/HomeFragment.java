@@ -27,6 +27,8 @@ import com.example.neighborguard.model.SearchMeetingsResponseSchema;
 import com.example.neighborguard.model.User;
 import com.example.neighborguard.enums.UserRoleEnum;
 import com.example.neighborguard.utils.DialogUtils;
+import com.example.neighborguard.utils.LocationManager;
+import com.example.neighborguard.utils.PermissionManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +57,9 @@ public class HomeFragment extends Fragment {
     private MeetingAdapter meetingAdapter;
     private ArrayList<Meeting> meetings;
 
+    private LocationManager locationManager;
+    private static final String TAG = "HomeFragment";
+
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -70,6 +75,9 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         currentUserManager = CurrentUserManager.getInstance();
 
+        // Initialize location manager
+        locationManager = LocationManager.getInstance();
+
         meetings = new ArrayList<>();
 
         userApi = ApiController.getRetrofitInstance().create(UserApi.class);
@@ -78,6 +86,72 @@ public class HomeFragment extends Fragment {
         setUserUIByRole(currentUserManager.getUser().getRole());
 
         initViews(currentUserManager.getUser().getRole());
+
+        // Only update volunteer location if permissions are granted
+        if (currentUserManager.getUser().getRole() == UserRoleEnum.VOLUNTEER) {
+            if (PermissionManager.hasAllPermissions(getActivity())) {
+                // Initialize location manager first
+                locationManager.init(getActivity());
+                // Then update location
+                updateVolunteerLocation();
+            } else {
+                // Don't try to update location yet - wait for permission grant
+                Log.d(TAG, "Location permissions not granted yet");
+            }
+        }
+    }
+
+    private void updateVolunteerLocation() {
+        if (!isAdded() || getActivity() == null) return;
+
+        // Only update location for volunteers
+        if (currentUserManager.getUser().getRole() != UserRoleEnum.VOLUNTEER) return;
+
+        Log.d(TAG, "Updating volunteer location");
+
+        // Make sure locationManager is not null
+        if (locationManager == null) {
+            locationManager = LocationManager.getInstance();
+            locationManager.init(getActivity());
+        }
+
+        // Set location update callback only if locationManager is initialized
+        if (locationManager != null) {
+            locationManager.setLocationUpdateCallback(location -> {
+                if (location == null) return;
+
+                // Update current user's location
+                User user = currentUserManager.getUser();
+                user.setLonLat(location);
+
+                // Update user in backend
+                updateUserInBackend(user, binding.homePBProgressBar, "Location updated");
+
+                // Update map with current location
+                if (mapFragment != null) {
+                    mapFragment.updateMyLocation(location.getLatitude(), location.getLongitude());
+                }
+            });
+
+            // Get last location and start updates - add null checks
+            locationManager.getLastLocation(getActivity(), location -> {
+                if (location == null) return;
+
+                Log.d(TAG, "Got last location: " + location.getLatitude() + ", " + location.getLongitude());
+
+                // Update current user's location
+                User user = currentUserManager.getUser();
+                user.setLonLat(location);
+
+                // Update user in backend
+                updateUserInBackend(user, binding.homePBProgressBar, "Location updated");
+
+                // Update map with current location
+                if (mapFragment != null) {
+                    mapFragment.updateMyLocation(location.getLatitude(), location.getLongitude());
+                }
+            });
+        }
     }
 
 
@@ -94,9 +168,15 @@ public class HomeFragment extends Fragment {
                 public void recipientClicked(double lat, double lng) {
                     mapFragment.zoom(lat,lng);
                 }
+
+                @Override
+                public void updateMapRecipients(ArrayList<User> recipients) {
+                    // Update the map with the recipients
+                    if (mapFragment != null) {
+                        mapFragment.updateRecipients(recipients);
+                    }
+                }
             });
-
-
 
 
             //map:
@@ -104,9 +184,6 @@ public class HomeFragment extends Fragment {
             getParentFragmentManager().beginTransaction()
                     .add(binding.homeVolunteerFRAMEMap.getId(), mapFragment)
                     .commit();
-
-
-
 
         }
         else {//is Recipient
@@ -319,6 +396,7 @@ public class HomeFragment extends Fragment {
             binding.homeRecipientLLServices.setVisibility(View.GONE);
             binding.homeRecipientBTNPost.setVisibility(View.GONE);
             binding.homeVolunteerFRAMEList.setVisibility(View.VISIBLE);
+            binding.homeVolunteerLISTContainer.setVisibility(View.VISIBLE); // Show the container too
             binding.homeVolunteerFRAMEMap.setVisibility(View.VISIBLE);
         }
         else{//is Recipient
@@ -329,6 +407,7 @@ public class HomeFragment extends Fragment {
             binding.homeRecipientLLServices.setVisibility(View.VISIBLE);
             binding.homeRecipientBTNPost.setVisibility(View.VISIBLE);
             binding.homeVolunteerFRAMEList.setVisibility(View.GONE);
+            binding.homeVolunteerLISTContainer.setVisibility(View.GONE); // Hide the container too
             binding.homeVolunteerFRAMEMap.setVisibility(View.GONE);
             // Configure the services text display
             HashMap<String, MeetingAssistanceStatusEnum> currentServices =
@@ -350,8 +429,24 @@ public class HomeFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        // Make sure to stop location updates
+        if (locationManager != null) {
+            // Remove the callback and stop updates
+            locationManager.setLocationUpdateCallback(null);
+            locationManager.stopLocationUpdates();
+        }
         super.onDestroyView();
-        binding = null;
+        binding = null; // Clear binding
+    }
+
+    @Override
+    public void onDestroy() {
+        // Also good to stop here in case onDestroyView isn't called
+        if (locationManager != null) {
+            locationManager.setLocationUpdateCallback(null);
+            locationManager.stopLocationUpdates();
+        }
+        super.onDestroy();
     }
 
     @Override
@@ -360,6 +455,9 @@ public class HomeFragment extends Fragment {
         // Refresh meetings list whenever fragment becomes visible
         if (currentUserManager.getUser().getRole() == UserRoleEnum.RECIPIENT) {
             fetchMeetings();
+        } else{
+            // For volunteers, update location when resuming
+            updateVolunteerLocation();
         }
     }
 }
