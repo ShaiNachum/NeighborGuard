@@ -1,0 +1,50 @@
+<resources>
+    <string name="permission_required_title">Permissions Required</string>
+    <string name="permission_required_message">NeighborGuard needs location, camera and storage permissions to function properly. Location is used to find nearby users, camera for profile photos, and storage to save photos.</string>
+    <string name="grant_permission">Grant Permissions</string>
+    <string name="not_now">Not Now</string>
+    <string name="permission_denied_title">Permissions Denied</string>
+    <string name="permission_denied_message">NeighborGuard needs these permissions to function properly. Please enable them in app settings.</string>
+    <string name="go_to_settings">Go to Settings</string>
+    <string name="cancel">Cancel</string>
+
+
+    <string name="app_name">NeighborGuard</string>
+    <string name="title_home">Home</string>
+    <string name="title_meetings">Meetings</string>
+    <string name="title_settings">Settings</string>
+    <string name="login">Please Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="register">Register</string>
+    <string name="click_to_login">Click to login</string>
+    <string name="click_to_register">Click to register</string>
+    <string name="logout">Logout</string>
+    <string name="volunteer">Volunteer</string>
+    <string name="recipient">Recipient</string>
+    <string name="i_am">I am:</string>
+    <string name="age">Age:</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="gender">Gender:</string>
+    <string name="phone_number">Phone number</string>
+    <string name="services">Services:</string>
+    <string name="languages">Languages:</string>
+    <string name="address">Address</string>
+    <string name="city">City</string>
+    <string name="street">Street</string>
+    <string name="house_number">House number</string>
+    <string name="apartment_number">Apartment number</string>
+    <string name="email_and_password">Email And Password</string>
+    <string name="about_you">About You</string>
+    <string name="select_languages">Select languages</string>
+    <string name="select_services">Select services</string>
+    <string name="save">Save</string>
+    <string name="i_am_ok">I AM OK 👍</string>
+    <string name="camera">CAMERA</string>
+    <string name="upload">UPLOAD</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="please_choose_your_identity">Please Choose Your Identity :</string>
+</resources>

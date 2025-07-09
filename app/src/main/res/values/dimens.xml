@@ -1,0 +1,28 @@
+<resources>
+    <!-- Default screen margins -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!-- Text sizes -->
+    <dimen name="recipient_text_size">14sp</dimen>
+
+    <!-- Recipient profile image card dimensions -->
+    <dimen name="recipient_image_card_width_expanded">120dp</dimen>
+    <dimen name="recipient_image_card_height_expanded">180dp</dimen>
+    <dimen name="recipient_image_card_width_collapsed">60dp</dimen>
+    <dimen name="recipient_image_card_height_collapsed">90dp</dimen>
+
+    <!-- Recipient data card margins -->
+    <dimen name="recipient_data_card_margin_start_expanded">68dp</dimen>
+    <dimen name="recipient_data_card_margin_start_collapsed">38dp</dimen>
+
+    <!-- Recipient data content margins -->
+    <dimen name="recipient_data_content_margin_start_expanded">60dp</dimen>
+    <dimen name="recipient_data_content_margin_start_collapsed">30dp</dimen>
+
+    <!-- Recipient check icon dimensions -->
+    <dimen name="recipient_check_icon_size_expanded">28dp</dimen>
+    <dimen name="recipient_check_icon_size_collapsed">20dp</dimen>
+    <dimen name="horizontal_meeting_item_text_size">16sp</dimen>
+    <dimen name="activity_meeting_data_text_size">18sp</dimen>
+</resources>

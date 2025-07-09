@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.meetings.MeetingsFragment"
+    android:background="@drawable/pearl_gradient"
+    android:orientation="vertical"
+    android:weightSum="2">
+
+
+    <!--RECIPIENT LAYOUT:-->
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/meetings_LL_recipient"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:orientation="vertical"
+        android:background="@drawable/pearl_gradient"
+        android:visibility="visible"
+        >
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/meetings_recipient_LBL_lastMeetings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="14dp"
+            android:text="Last Meetings:"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/meetings_recipient_RV_nextMeetingsList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="4dp"
+            android:visibility="visible"
+            tools:listitem="@layout/horizontal_meeting_item" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+
+
+    <!--VOLUNTEER LAYOUT:-->
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/meetings_LL_volunteer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:orientation="vertical"
+        android:background="@drawable/pearl_gradient"
+        android:visibility="gone"
+        >
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/meetings_volunteer_LBL_nextMeetings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="14dp"
+            android:text="Next Meetings:"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="8dp"
+            android:padding="3dp"
+            android:background="@color/textColorDay"> <!-- This creates the border color -->
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/pearl_gradient">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/meetings_volunteer_RV_nextMeetingsList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingHorizontal="4dp"
+                    android:visibility="visible"
+                    tools:listitem="@layout/horizontal_meeting_item" />
+
+            </FrameLayout>
+        </FrameLayout>
+
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/meetings_volunteer_LBL_lastMeetings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="14dp"
+            android:text="Last Meetings:"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:visibility="visible"
+            />
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginBottom="8dp"
+            android:padding="3dp"
+            android:background="@color/textColorDay"> <!-- This creates the border color -->
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/pearl_gradient">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/meetings_volunteer_RV_lastMeetingsList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingHorizontal="4dp"
+                    android:visibility="visible"
+                    tools:listitem="@layout/horizontal_meeting_item" />
+
+            </FrameLayout>
+        </FrameLayout>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+
+</androidx.appcompat.widget.LinearLayoutCompat>

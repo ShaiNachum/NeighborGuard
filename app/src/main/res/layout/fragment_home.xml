@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.home.HomeFragment"
+    android:background="@drawable/pearl_gradient"
+    android:orientation="vertical"
+    android:weightSum="12">
+
+
+    <!-- Top Section  -->
+    <FrameLayout
+        android:id="@+id/home_recipient_FL_upperPart"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:visibility="visible"
+        >
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/home_recipient_BTN_iAmOk"
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+            android:text="@string/i_am_ok"
+            android:textStyle="bold"
+            android:textSize="28sp"
+            android:layout_gravity="center"
+            android:layout_marginVertical="16dp"
+            android:backgroundTint="@color/greenA400"
+            app:cornerRadius="15dp"
+            android:visibility="visible"
+            />
+
+    </FrameLayout>
+
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/home_recipient_LBL_nextMeetings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="14dp"
+        android:text="Next Meetings:"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:visibility="visible"
+        />
+
+
+    <!-- Middle Section-->
+    <FrameLayout
+        android:id="@+id/home_recipient_FL_middleSection"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6"
+        android:layout_marginHorizontal="14dp"
+        android:padding="3dp"
+        android:background="@color/textColorDay"> <!-- This creates the border color -->
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/pearl_gradient">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/home_recipient_FRAME_nextMeetingsList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="4dp"
+                android:visibility="visible"
+                tools:listitem="@layout/horizontal_meeting_item" />
+
+        </FrameLayout>
+    </FrameLayout>
+
+    <ProgressBar
+        android:id="@+id/home_recipient_PB_progressBar"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"/>
+
+
+    <!-- Bottom Section-->
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/home_recipient_LL_services"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="4"
+        android:paddingHorizontal="14dp"
+        android:orientation="vertical"
+        android:layout_gravity="left"
+        android:layout_marginVertical="16dp"
+        android:visibility="visible"
+        >
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/home_recipient_LBL_servicesNeeded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:text="Services I Need:"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/home_recipient_LBL_selectServices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/select_services"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="16dp"
+            android:drawablePadding="16dp"
+            android:layout_marginHorizontal="32dp"
+            android:drawableEnd="@android:drawable/arrow_down_float"
+            android:background="@android:drawable/editbox_background"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:maxLines="1" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/home_recipient_BTN_post"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="16dp"
+            android:text="Post"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_gravity="center"
+            app:cornerRadius="15dp"
+            android:visibility="visible"
+            />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+
+
+
+    <!--VOLUNTEER LAYOUT:-->
+    <FrameLayout
+        android:id="@+id/home_volunteer_FRAME_map"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6"
+        android:padding="6dp"
+        android:visibility="gone"
+        />
+
+    <ProgressBar
+        android:id="@+id/home_PB_progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        />
+
+
+    <!-- UPDATED: Added frame with border around the list section -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6"
+        android:layout_marginHorizontal="7dp"
+        android:padding="4dp"
+        android:background="@color/textColorDay"
+        android:visibility="gone"
+        android:id="@+id/home_volunteer_LIST_container"> <!-- Outer frame with border color -->
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/pearl_gradient"> <!-- Inner frame with gradient background -->
+
+            <FrameLayout
+                android:id="@+id/home_volunteer_FRAME_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+        </FrameLayout>
+    </FrameLayout>
+
+
+</androidx.appcompat.widget.LinearLayoutCompat>
